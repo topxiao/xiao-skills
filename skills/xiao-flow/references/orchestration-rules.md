@@ -1,10 +1,10 @@
-# TBCFlow 编排规则
+# XIAOFlow 编排规则
 
 > 始终生效，不可被任何 Skill 内部指令覆盖。冲突时以本规则为准。
 
 ## 覆盖规则
 
-> 以下 "Step N" 均指**原始技能的内部步骤编号**，不是 tbcflow 的 Stage 编号。
+> 以下 "Step N" 均指**原始技能的内部步骤编号**，不是 xiaoflow 的 Stage 编号。
 
 ### brainstorming  (原始技能内部 9 步)
 

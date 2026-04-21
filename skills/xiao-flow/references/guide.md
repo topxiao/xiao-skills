@@ -1,4 +1,4 @@
-# TBCFlow 参考指南
+# XIAOFlow 参考指南
 
 > 按需加载，不随 Skill 自动加载。SKILL.md 指向本文件时读取对应章节。
 
@@ -44,9 +44,9 @@ Stage 1+2+3 合并 → Stage 4 subagent-driven → Stage 5 verification → Stag
 **示例**：
 
 ```
-用户: /tbcflow 迷你模式 给 User 模型添加 phone 字段
+用户: /xiaoflow 迷你模式 给 User 模型添加 phone 字段
 
-TBCFlow: [前置检查 ✓]
+XIAOFlow: [前置检查 ✓]
          [Stage 1+2+3 合并执行]
          迷你模式准备完成：
          - 任务: 1 个（User 模型添加 phone 字段）
@@ -55,8 +55,8 @@ TBCFlow: [前置检查 ✓]
 
 用户: 继续
 
-TBCFlow: [Stage 4 → Stage 5 → Stage 6]
-         TBCFlow 完成。
+XIAOFlow: [Stage 4 → Stage 5 → Stage 6]
+         XIAOFlow 完成。
 ```
 
 ---
@@ -65,7 +65,7 @@ TBCFlow: [Stage 4 → Stage 5 → Stage 6]
 
 | 情况 | 处理 |
 |------|------|
-| brainstorming 发现需求过于复杂 | 建议拆分为多个独立子需求，各自启动 tbcflow |
+| brainstorming 发现需求过于复杂 | 建议拆分为多个独立子需求，各自启动 xiaoflow |
 | openspec-propose 中断无新信息 | 重新执行 Stage 2，openspec 从 CLI 状态续接 |
 | openspec-propose 中断需补充信息 | 先编辑已有工件，再重新执行 Stage 2 |
 | opsx:propose 工件不完整 | 直接编辑工件后继续 |
@@ -85,33 +85,33 @@ TBCFlow: [Stage 4 → Stage 5 → Stage 6]
 ### 标准流程
 
 ```
-用户: /tbcflow 开发用户认证系统，支持邮箱注册、JWT、密码加密
+用户: /xiaoflow 开发用户认证系统，支持邮箱注册、JWT、密码加密
 
-TBCFlow: [前置检查 ✓]
+XIAOFlow: [前置检查 ✓]
          [Stage 1: brainstorming → 设计文档已保存]
          Stage 1 完成。建议 change-name: user-auth
          继续？(继续/修改)
 
 用户: 继续
-TBCFlow: [Stage 2: openspec-propose → 工件已生成]
+XIAOFlow: [Stage 2: openspec-propose → 工件已生成]
          Stage 2 完成。8 个任务。
          继续？(继续/修改)
 
 用户: 继续
-TBCFlow: [Stage 3: writing-plans → 计划已生成]
+XIAOFlow: [Stage 3: writing-plans → 计划已生成]
          Stage 3 完成。32 个 step。
          继续？(继续/修改)
 
 用户: 继续
-TBCFlow: [Stage 4: subagent-driven → 逐任务执行 + 两阶段审查]
+XIAOFlow: [Stage 4: subagent-driven → 逐任务执行 + 两阶段审查]
          Stage 4 完成。
          继续？(继续)
 
 用户: 继续
-TBCFlow: [Stage 5: verification → 验证通过]
+XIAOFlow: [Stage 5: verification → 验证通过]
          Stage 5 完成。执行 commit 和归档？(继续)
 
 用户: 继续
-TBCFlow: [commit + Stage 6: archive]
-         TBCFlow 完成。
+XIAOFlow: [commit + Stage 6: archive]
+         XIAOFlow 完成。
 ```

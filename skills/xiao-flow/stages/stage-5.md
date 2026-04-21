@@ -14,11 +14,11 @@
 
 若同步发现未完成的 Task → 报告具体未完成项，退回 Stage 4。
 
-## tbcckg 辅助
+## xiaockg 辅助
 
 > 新项目时跳过本节，直接进入验证部分。
 
-验证阶段用 tbcckg 做文件级变更影响评估，作为最终安全网：
+验证阶段用 xiaockg 做文件级变更影响评估，作为最终安全网：
 
 ```
 detect_changes → changedFiles="变更文件JSON数组" project="项目名" category="分类"
@@ -40,9 +40,9 @@ detect_changes → changedFiles="变更文件JSON数组" project="项目名" cat
 6. 无提前 commit — git log 检查：
    - 如发现异常 commit，报告列表（hash、message、时间）
    - 询问用户是否 git reset --soft HEAD~N，确认后执行
-7. 变更影响可控 — tbcckg detect_changes 风险评估结果
+7. 变更影响可控 — xiaockg detect_changes 风险评估结果
 
-<tbcckg detect_changes 结果>
+<xiaockg detect_changes 结果>
 
 规范位置: openspec/changes/<change-name>/
 ```

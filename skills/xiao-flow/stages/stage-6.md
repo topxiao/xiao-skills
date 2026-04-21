@@ -55,7 +55,7 @@ ls openspec/changes/<change-name>/
 
 **仅在 Step 3 归档验证通过后执行：**
 
-使用 `/tbc-commit` 提交变更。
+使用 `/xiao-commit` 提交变更。
 
 验证 commit：
 
@@ -68,7 +68,7 @@ git status -s
 ## 完成输出
 
 ```
-TBCFlow 完成。
+XIAOFlow 完成。
 - Change: <change-name>
 - 归档: openspec/changes/archive/YYYY-MM-DD-<name>/
 - Commit: <commit hash>（或：未 commit）

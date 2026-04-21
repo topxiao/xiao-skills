@@ -1,10 +1,10 @@
 # Stage 3: 计划拆分 → `superpowers:writing-plans`
 
-## tbcckg 辅助
+## xiaockg 辅助
 
 > 新项目时跳过本节，直接进入上下文部分。
 
-生成计划时用 tbcckg 评估变更影响、获取精确文件路径：
+生成计划时用 xiaockg 评估变更影响、获取精确文件路径：
 
 ```
 逐 capability 生成计划时，对涉及的实体调用：
@@ -26,12 +26,12 @@
 2. 仅读取 openspec/changes/<change-name>/design.md — 理解架构决策
 3. 逐 capability 生成计划（每次只处理一个）：
    - 仅读取该 capability 的 openspec/changes/<change-name>/specs/<capability>/spec.md
-   - 用 tbcckg impact 评估影响范围，locate 获取精确文件路径
+   - 用 xiaockg impact 评估影响范围，locate 获取精确文件路径
    - 基于需求生成实施 steps（核心代码、精确路径）
    - 追加写入计划文件
 4. 全部完成后读取计划文件做整体一致性检查
 
-<tbcckg 影响分析结果（如有）>
+<xiaockg 影响分析结果（如有）>
 
 保存到: docs/superpowers/plans/YYYY-MM-DD-<change-name>.md
 若该文件已存在（不完整计划或中断恢复），直接覆盖重写。

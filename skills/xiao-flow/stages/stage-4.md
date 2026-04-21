@@ -13,7 +13,7 @@
    - 仅读取该任务的 step 部分（不读取其他任务内容）
    - Plan 已包含精确文件路径（来自 Stage 3 的 locate），直接 Read 源码
    - 执行过程中对照 openspec/changes/<change-name>/specs/ 验证实现
-   - 如需定位 Plan 中未覆盖的代码，按需调用 tbcckg locate/search
+   - 如需定位 Plan 中未覆盖的代码，按需调用 xiaockg locate/search
    - 完成后将 Plan 文件中 `### Task N: title` 标记为 `### [x] Task N: title`
 3. 全部完成后做最终全量代码审查
 ```
