@@ -17,7 +17,7 @@ const scriptPath = fileURLToPath(new URL("./state.mjs", import.meta.url));
 
 function fixture(mode = "standard") {
   const root = mkdtempSync(join(tmpdir(), "xiao-flow-state-"));
-  const statePath = join(root, "docs", "superpowers", "xiao-flow", "demo.json");
+  const statePath = join(root, ".xiao-flow", "demo.json");
   const designPath = "docs/superpowers/specs/demo-design.md";
   mkdirSync(dirname(join(root, designPath)), { recursive: true });
   writeFileSync(join(root, designPath), "# Design\n", "utf8");
@@ -125,7 +125,7 @@ test("OpenSpec task progress does not invalidate the planning snapshot", () => {
 
 test("initial dirty file changes remain visible", () => {
   const root = mkdtempSync(join(tmpdir(), "xiao-flow-dirty-"));
-  const statePath = join(root, "docs", "superpowers", "xiao-flow", "demo.json");
+  const statePath = join(root, ".xiao-flow", "demo.json");
   const dirtyPath = "notes.md";
   try {
     writeFileSync(join(root, dirtyPath), "user draft\n", "utf8");
@@ -280,7 +280,7 @@ test("rolling back invalidates downstream evidence", () => {
 
 test("compatibility recovery can initialize directly at a validated stage", () => {
   const root = mkdtempSync(join(tmpdir(), "xiao-flow-recovery-"));
-  const statePath = join(root, "docs", "superpowers", "xiao-flow", "demo.json");
+  const statePath = join(root, ".xiao-flow", "demo.json");
   try {
     run([
       "init",

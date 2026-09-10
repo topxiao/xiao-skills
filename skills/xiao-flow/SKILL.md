@@ -1,6 +1,6 @@
 ---
 name: xiao-flow
-description: "XIAO 分阶段开发工作流，编排 OpenSpec 与 Superpowers 完成需求探索、规范生成、计划拆分、TDD 实现、验证和归档，并提供可恢复状态、Mini 短路径和工件漂移检测。用户显式调用 /xiao-flow、要求按 XIAO/OpenSpec 流程开发，或要求继续已有 xiao-flow change 时使用。未显式要求该流程时，不要用于普通单次小改、纯诊断、代码审查或只需回答问题的任务。"
+description: "分阶段开发工作流编排器，协调 OpenSpec 与 Superpowers 完成需求到归档的全流程。用户显式调用 /xiao-flow 或要求按 XIAO 流程开发时激活。"
 license: MIT
 compatibility: Requires Node.js, Git, OpenSpec CLI, and the mode-specific OpenSpec/Superpowers skills listed below
 metadata:
@@ -43,7 +43,7 @@ metadata:
 
 ## 状态与恢复
 
-用户确认 change-name 后，通过 `node <skill-root>/scripts/state.mjs init ...` 在 `docs/superpowers/xiao-flow/<change-name>.json` 创建状态文件。目录只保存每个 change 的本地编排状态，文件名必须与 change-name 完全一致；默认不纳入产品提交，不保存密钥、文件内容或完整日志。
+用户确认 change-name 后，通过 `node <skill-root>/scripts/state.mjs init ...` 在 `.xiao-flow/<change-name>.json` 创建状态文件。目录只保存每个 change 的本地编排状态，文件名必须与 change-name 完全一致；init 时自动追加 `.gitignore`，不保存密钥、文件内容或完整日志。
 
 使用 `/xiao-flow 继续 <change-name>` 恢复。优先读取状态文件并验证对应 Stage 的退出条件；状态缺失、过期或冲突时，按 `references/state-and-recovery.md` 的文件证据恢复到最早未完成阶段。不要仅凭 Plan 中是否存在 `[x]` 决定重写计划。
 

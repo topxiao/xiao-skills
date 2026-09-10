@@ -2,17 +2,9 @@
 
 ## OpenSpec task 同步
 
-Standard/Fast 的 Plan 和 Mini 的 `completedTasks` 是执行进度，OpenSpec `tasks.md` 是规范任务源。同步时保留 OpenSpec 原文、顺序和层级：
+先检查快照（Standard/Fast 检查 planning + plan；Mini 检查 planning）。漂移时先回退，不同步 checkbox。Standard/Fast 按 Plan Task 的 **OpenSpec Task** 字段映射：关联 Plan Task 全部为 `[x]` 时才勾选原 checkbox。Mini 按 `completedTasks` 同步唯一 task。不新增、删除、改写或重排 OpenSpec task 文本。
 
-```
-1. 先检查 planning 快照；Standard/Fast 还要检查 plan 快照。漂移时先回退，不同步 checkbox。
-2. Standard/Fast 读取 planPath，按每个 Plan Task 的 **OpenSpec Task** 字段建立映射。
-3. 一个 OpenSpec task 可关联多个 Plan Task；只有关联 Plan Task 全部为 [x] 时，才把原 checkbox 改为 [x]。
-4. Mini 只把 completedTasks 中已完成的唯一 task ID 对应 checkbox 改为 [x]。
-5. 不新增、删除、改写或重排 OpenSpec task 文本。
-```
-
-Standard/Fast 存在零映射、Plan Task 缺少映射或未知 task ID 时停止同步并回 Stage 3。存在未完成实现任务时报告具体项并回 Stage 4。
+映射不完整或存在未知 task ID 时回 Stage 3；存在未完成实现任务时回 Stage 4。
 
 ## 验证
 

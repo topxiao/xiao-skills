@@ -28,12 +28,8 @@ Stage 5 验证通过。选择归档方式：
 **归档验证（不可跳过）：**
 
 ```bash
-# 确认实际 archivePath 已生成
 ls <archivePath>
-
-# 确认源目录已移除
 ls openspec/changes/<change-name>/
-# 应返回 "No such file or directory" 或为空
 ```
 
 若归档目录不存在或源目录未移除 → **归档未完成，不可继续 commit。** 排查原因后重试。
@@ -48,6 +44,16 @@ node <skill-root>/scripts/state.mjs archive <state-file> <archivePath> <archive-
 
 - 选择只归档：随后运行 `state.mjs complete <state-file>`，状态进入 `completed`。
 - 选择归档 + commit：状态保持 `archived` 且 `pendingAction: commit`，commit 成功前不得标记 completed。
+
+## Step 2.5: 收纳中间产物
+
+将中间文档移入归档目录，使每个 change 的全部记录集中在 `<archivePath>/`：
+
+1. `designPath` 对应的文件存在 → 移动到 `<archivePath>/design-input.md`，删除原文件。
+2. `planPath` 对应的文件存在（Standard/Fast）→ 移动到 `<archivePath>/plan.md`，删除原文件。
+3. 移动后若原目录（如 `docs/superpowers/specs/`、`docs/superpowers/plans/`）变空，一并删除空目录。
+
+后续 commit 的精确路径应包含归档目录中的新文件和原路径的删除。
 
 ## Step 3: Commit（仅当用户选方案 1）
 

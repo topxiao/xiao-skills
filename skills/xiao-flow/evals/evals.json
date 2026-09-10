@@ -77,7 +77,7 @@
     },
     {
       "id": 7,
-      "prompt": "/xiao-flow 继续。docs/superpowers/xiao-flow/ 下有 order-api 和 user-search 两个 active 状态文件，用户没有提供 change-name。",
+      "prompt": "/xiao-flow 继续。.xiao-flow/ 下有 order-api 和 user-search 两个 active 状态文件，用户没有提供 change-name。",
       "expected_output": "列出两个候选 change-name 并等待用户选择，不根据文件时间、目录顺序或最近 Git 修改自行猜测。",
       "files": [],
       "expectations": [

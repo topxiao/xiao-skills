@@ -245,6 +245,20 @@ function invalidateForStage(state, targetStage) {
   state.completedAt = null;
 }
 
+function ensureGitignore(projectRoot) {
+  const gitignorePath = resolve(projectRoot, ".gitignore");
+  const entry = ".xiao-flow/";
+  if (existsSync(gitignorePath)) {
+    const content = readFileSync(gitignorePath, "utf8");
+    const lines = content.split(/\r?\n/).map((line) => line.trim());
+    if (lines.includes(".xiao-flow") || lines.includes(".xiao-flow/")) return;
+    const separator = content.endsWith("\n") ? "" : "\n";
+    writeFileSync(gitignorePath, `${content}${separator}${entry}\n`, "utf8");
+  } else {
+    writeFileSync(gitignorePath, `${entry}\n`, "utf8");
+  }
+}
+
 function commandInit(statePath, args) {
   if (existsSync(statePath)) {
     fail(`State file already exists: ${statePath}`);
@@ -267,9 +281,7 @@ function commandInit(statePath, args) {
   }
   const expectedStatePath = resolve(
     projectRoot,
-    "docs",
-    "superpowers",
-    "xiao-flow",
+    ".xiao-flow",
     `${changeName}.json`,
   );
   if (resolve(statePath) !== expectedStatePath) {
@@ -308,6 +320,7 @@ function commandInit(statePath, args) {
     seed.initialDirtySnapshot = createSnapshot(seed, "verification", dirtyPaths);
   }
   writeStateAtomic(statePath, seed);
+  ensureGitignore(projectRoot);
   console.log(`Initialized ${statePath}`);
 }
 

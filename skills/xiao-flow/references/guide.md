@@ -43,42 +43,17 @@ Stage 1、2、3、4 分别汇报并等待确认；Stage 5 通过后进入 Stage 
 
 ## 异常处理
 
+阶段特定的偏差和回退规则见各 Stage 文件。以下为跨阶段通用异常：
+
 | 情况 | 处理 |
 |------|------|
 | Git、OpenSpec CLI 或必需 Skill 缺失 | 写文件前停止，列出缺失项和检测证据 |
 | 状态文件与实际文件冲突 | 用 `state.mjs check` 定位漂移，再用 `state.mjs stage` 回退到最早未满足退出条件的 Stage |
 | 多个活跃 change | 列出候选 change-name，询问用户选择 |
 | Stage 1 需求过大 | 建议拆分独立 change，未经用户选择不擅自拆分 |
-| Stage 2 中断或工件不完整 | 继续 Stage 2，通过 `openspec-propose` 同步补齐所有相关工件 |
-| Stage 3 中断 | 从缺失 capability 继续，不覆盖已完成或用户编辑的 Plan 内容 |
-| Stage 3 出现 TODO、未知路径或 task 映射错误 | 留在 Stage 3，调查并修正；同一 OpenSpec task 可以关联多个 Plan Task，但不能零映射 |
-| Stage 4 任务间中断 | 从首个未完成且依赖满足的 Plan Task 继续 |
-| Stage 4 任务内中断 | 保留当前工作树和 `currentTask`，检查 diff 后继续；不自动 stash 或丢弃修改 |
-| Stage 4 调试阻塞 | 优先使用可用的 `superpowers:systematic-debugging`，否则执行系统化诊断；然后重跑当前 Task 的测试和审查 |
-| 实现中发现规范错误或范围变化 | 回 Stage 2 更新 OpenSpec；Standard/Fast 重做 Stage 3，Mini 重新确认是否仍满足短路径 |
 | 发现外部并发修改 | 报告文件和重叠范围；可隔离则继续，否则等待用户处理 |
-| Stage 5 验证失败 | 规范问题回 Stage 2，Plan 问题回 Stage 3，实现问题回 Stage 4 |
-| Stage 5 发现提前 commit | 报告 `baseCommit..HEAD` 精确范围，不自动 reset 或改写历史 |
-| Stage 6 归档失败 | 保持 `active/Stage 6`，修复归档后再决定 commit |
-| Stage 6 归档成功但 commit 失败 | 保持 `archived + pendingAction: commit`，不要标记 completed；修复后只重试 scoped commit |
 
 ## 使用示例
-
-### 标准流程
-
-```text
-用户: /xiao-flow 开发用户认证系统，支持邮箱注册、JWT、密码加密
-
-XIAOFlow: [前置检查：规则、依赖、Git 基线]
-          [Stage 1：设计文档与 change-name 已确认]
-          [Stage 2：OpenSpec 工件完整，任务粒度已确认]
-          [Stage 3：Plan 已生成，8/8 OpenSpec tasks 已映射]
-          [Stage 4：逐 Task TDD + 两阶段审查]
-          [Stage 5：规范、测试、静态检查、Git 边界验证通过]
-          Stage 6 请选择：归档 + commit / 只归档
-```
-
-### Mini
 
 ```text
 用户: /xiao-flow mini 给 User 模型添加可选的 displayName 字段
@@ -87,9 +62,6 @@ XIAOFlow: [前置检查通过]
           [Stage 1：内联调查，确认精简设计和 change-name]
           [Stage 2：OpenSpec 工件与 planning 快照完成]
           [Stage 4：按唯一 task 完成 inline TDD]
-          - Change: add-user-display-name
-          - OpenSpec tasks: 1
-          - 独立 Plan: skipped
           [Stage 5：验证通过]
           请选择归档方式：归档 + commit / 只归档
 ```

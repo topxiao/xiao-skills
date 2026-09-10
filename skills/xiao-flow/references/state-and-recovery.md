@@ -5,11 +5,11 @@
 状态文件固定为：
 
 ```text
-docs/superpowers/xiao-flow/<change-name>.json
+.xiao-flow/<change-name>.json
 ```
 
 - Stage 1 结束并确认 change-name 后创建；一个 change 对应一个同名 JSON。
-- 状态文件是本地控制记录，默认不纳入产品 commit；项目规则要求版本化时另行处理。
+- 状态文件是本地控制记录，init 时自动追加到 `.gitignore`；项目规则要求版本化时另行处理。
 - 完成后保留，不自动删除或改名。
 - 只记录状态、时间、路径、简短标识和 hash；不要写入密钥、文件内容、完整日志或客户数据。
 - 使用 `node <skill-root>/scripts/state.mjs ...` 读写。脚本在同目录写临时文件并原子替换，禁止直接编辑 JSON 绕过校验。
