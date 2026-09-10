@@ -1,44 +1,52 @@
 # XIAOFlow 编排规则
 
-> 始终生效，不可被任何 Skill 内部指令覆盖。冲突时以本规则为准。
+> 本文件始终生效。不要依赖上游 Skill 的内部步骤编号；它们可能随版本变化。只覆盖输入、输出、阶段出口和安全边界。
 
-## 覆盖规则
+## 通用边界
 
-> 以下 "Step N" 均指**原始技能的内部步骤编号**，不是 xiaoflow 的 Stage 编号。
+- 被调用 Skill 负责本阶段专业工作，XIAOFlow 负责提供完整输入、检查退出条件并决定下一阶段。
+- 无论被调用 Skill 默认建议什么，`standard`/`fast` 均按 Stage 1 → 6 流转；`mini` 使用 1 → 2 → 4 → 5 → 6 短路径。短路径可以跳过独立 Plan，但不能跳过 OpenSpec、TDD、验证或归档。
+- Stage 6 前禁止 commit，包括实现子代理。禁止自动 stash、reset、删除 worktree 或丢弃任何修改。
+- 不并行分派实现任务；并行只允许用于互不修改文件的只读调查或调试取证。
+- 状态与文件冲突时，以项目规则、实际文件、OpenSpec 状态和 Git 证据为准，回退到最早未满足退出条件的 Stage。
+- 只通过 `scripts/state.mjs` 更新状态和快照；不要手工改写 JSON 绕过合法转换。
 
-### brainstorming  (原始技能内部 9 步)
+## Skill 覆盖规则
 
-- 完成后**进入 Stage 2 (openspec-propose)**，不进入 writing-plans
-  > 覆盖原 Step 9 "Transition to implementation → 调用 writing-plans" 的出口重定向
-- Step 6 的 **commit 被覆盖**，仅保存文件
-  > 覆盖原 Step 6 "Write design doc → commit"，将 commit 统一到 Stage 6
+### `superpowers:brainstorming`
 
-### opsx:propose  (openspec-propose 技能)
+- 仅用于 `standard`/`fast`；`mini` 由 XIAOFlow 完成一次内联边界调查并生成精简设计输入。
+- 输出 Stage 1 设计文档后返回 XIAOFlow，不直接进入 writing-plans。
+- 如果上游流程包含 commit，只保存文档；提交统一留到 Stage 6。
 
-- 接收 Stage 1 设计文档作为输入，**不主动询问开放式问题**
-- **允许在关键信息缺失时澄清具体细节**（如技术选型、接口约定、数据结构）
-- 完成后**不要建议运行 /opsx:apply**，下一步是 writing-plans
-  > 覆盖原出口 "Run /opsx:apply to start working on the tasks"
+### `openspec-propose`
 
-### writing-plans  (原始技能内部 5 步)
+- `/opsx:propose` 仅视为命令别名，编排中统一使用 Skill 名 `openspec-propose`。
+- 以 Stage 1 设计文档作为需求来源；只在缺少关键技术契约时提出具体问题。
+- 工件完成后返回 XIAOFlow 做完整性和粒度检查，不运行 `/opsx:apply`。
 
-- 输入来源是 **OpenSpec 的 design.md + specs/**，不读取 brainstorming 设计文档
-  > 覆盖原输入源，改为读取 Stage 2 产出的 OpenSpec 工件
-- **不反向更新 tasks.md**
-- **Execution Handoff 被覆盖**，不提供选择，直接进入 Stage 4
-  > 覆盖原 Step 5 "提供 subagent-driven / inline 两选项"
+### `superpowers:writing-plans`
 
-### subagent-driven  (原始技能内部 12 步)
+- 仅用于 `standard`/`fast`；`mini` 不生成独立 Plan。
+- 输入包括 OpenSpec 的 `proposal.md`、`design.md`、`specs/`、`tasks.md`，以及按 capability 调查到的现有源码和测试。
+- 每个 Plan Task 指向一个 OpenSpec task；同一 OpenSpec task 可拆为多个 Plan Task。Stage 3 不修改 `tasks.md`。
+- 生成 Plan 后返回 XIAOFlow，不执行上游默认的 implementation handoff。
 
-- 进度追踪只更新 **Plan 文件** Task checkbox，**不更新 tasks.md**
-- **绝对禁止 commit**——包括 implementer 子代理
-  > 覆盖原 implementer-prompt 中 "Commit your work"，将 commit 统一到 Stage 6
-- Step 12 "finishing-a-development-branch" **被覆盖**，Stage 4 后进入 Stage 5
-  > 覆盖原 Step 12 的出口，改为进入验证阶段
+### `superpowers:subagent-driven-development`
 
-## 禁止事项
+- 仅用于 `standard`/`fast`；`mini` 由当前 Agent 按唯一 OpenSpec task 做 inline TDD。
+- 进度只更新 Plan Task 和状态文件中的 `currentTask`，不直接更新 `tasks.md`。
+- 每个 Task 通过针对性测试和两阶段审查后才标记 `[x]`。
+- 完成全部 Task 后返回 Stage 5，不调用 finishing-a-development-branch，也不 commit。
 
-- 不要跳过任何 Stage
-- 不要替 Skill 做它的工作
-- 不要在验证通过前 commit 任何文件
-- 不要并行分派实现 SubAgent，dispatching-parallel-agents 仅用于调试场景
+### `superpowers:verification-before-completion`
+
+- `standard`/`fast` 先按 Plan 映射同步 OpenSpec task；`mini` 按状态文件中的 `completedTasks` 同步唯一 task。
+- 验证必须覆盖 OpenSpec specs 中的场景、项目规定命令和当前 change 的 Git 边界。
+- 只接受本次运行得到的新鲜命令输出，不用推断或历史结果代替。
+- 验证通过后返回 Stage 6；验证失败时按失败类型回到 Stage 2、3 或 4。
+
+### `openspec-archive-change`
+
+- 仅在 Stage 5 通过且用户选择归档方式后调用。
+- 归档完成后返回 XIAOFlow 做路径验证和可选的 scoped commit。

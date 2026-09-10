@@ -1,117 +1,95 @@
 # XIAOFlow 参考指南
 
-> 按需加载，不随 Skill 自动加载。SKILL.md 指向本文件时读取对应章节。
+> 按需加载。模式在前置检查时确定并写入状态文件；恢复时沿用原模式，除非用户明确更改。
 
----
+## 模式
 
-## 快速模式
+模式只允许从短路径向更严格路径升级，不允许在已经生成工件后降级。
 
-### 标准快速模式（2-3 个任务）
+| 模式 | 适用边界 | 阶段序列 | 执行方式 |
+|------|----------|----------|----------|
+| Standard | 跨模块、新功能、架构调整或风险不明确 | 1 → 2 → 3 → 4 → 5 → 6 | 完整 Plan + SDD |
+| Fast | 2–3 个低风险 OpenSpec task、单一模块 | 1 → 2 → 3 → 4 → 5 → 6 | 精简 Plan + SDD，减少确认轮次 |
+| Mini | 1 个低风险、可独立验证的 OpenSpec task | 1 → 2 → 4 → 5 → 6 | 无独立 Plan，inline TDD |
 
-用户说"快速模式"：
+### Standard（默认）
 
-```
-Stage 1 brainstorming（精简版：跳过视觉辅助、跳过方案对比）
-Stage 2 opsx:propose
-Stage 3 writing-plans（仍保留，subagent-driven 需要 Plan 文件）
-Stage 4 subagent-driven
-Stage 5 verification
-Stage 6 archive
-```
+Stage 1、2、3、4 分别汇报并等待确认；Stage 5 通过后进入 Stage 6，由用户选择归档方式。
 
-**不跳过 writing-plans**。subagent-driven-development 需要 Plan 文件。快速模式的"快"体现在 brainstorming 和 writing-plans 的精简，而非跳过 Stage。
+### Fast（加速完整路径）
 
-### 迷你模式（1 个任务）
+- Stage 1 使用 `superpowers:brainstorming`，聚焦边界和推荐方案。
+- Stage 1 获得确认后连续执行 Stage 2–3；Stage 2 自动完成粒度自审，仅在边界不满足时暂停。
+- Stage 3 仍保留 OpenSpec task 映射、代码调查、验证命令和独立 Plan，但压缩解释性文字。
+- Stage 3 确认后连续执行 Stage 4–5；验证通过后再询问归档方式。
 
-用户说"迷你模式"时，合并前三个 Stage：
+### Mini（真正短路径）
 
-```
-Stage 1+2+3 合并 → Stage 4 subagent-driven → Stage 5 verification → Stage 6 archive
-```
+- 只在用户显式选择或边界完全明确时使用。
+- Stage 1 不调用 brainstorming Skill；XIAOFlow 调查相关代码后生成一份精简设计输入，只记录问题、范围、非目标、文件边界和验证方式。
+- Stage 2 仍生成完整 OpenSpec 工件，并确认只有一个 task、一个 capability、无高风险边界。
+- Stage 2 保存 `planning` 快照后直接转换到 Stage 4，不生成独立 Plan。
+- Stage 4 由当前 Agent 根据唯一 OpenSpec task/spec 做 inline TDD；不分派实现子代理。
+- Stage 5–6 与其他模式相同。
 
-**升级机制**：brainstorming 后发现以下任一条件时暂停，建议切换标准模式：
-- 任务数 > 3
-- 横跨 2 个以上技术领域（如同时涉及前端+后端+数据库）
+### 升级规则
 
-已生成工件保留不重做。用户坚持则继续。
+- Mini 发现 2–3 个低风险 task、仍为单一模块 → `mini → fast`，补做 Stage 3。
+- Mini 或 Fast 发现超过 3 个 task、跨模块、风险不明确 → 升级 Standard。
+- 涉及数据库 schema/迁移、认证授权、安全边界、公开 API、CI/CD、基础设施或生产发布 → Standard。
+- 无法明确变更文件或自动化验证方式 → Standard。
 
-**合并步骤**：
-1. `superpowers:brainstorming` 快速分析（跳过视觉辅助、方案对比、扩展思考）
-2. 基于分析结果调用 `openspec-propose` 生成工件
-3. 基于 tasks.md 用 `superpowers:writing-plans` 生成精简 Plan（1 任务 = 2-4 step）
-4. 一次性汇报，用户确认后进入 Stage 4
-
-**示例**：
-
-```
-用户: /xiaoflow 迷你模式 给 User 模型添加 phone 字段
-
-XIAOFlow: [前置检查 ✓]
-         [Stage 1+2+3 合并执行]
-         迷你模式准备完成：
-         - 任务: 1 个（User 模型添加 phone 字段）
-         - 计划: 3 个 step
-         开始执行？(继续/修改)
-
-用户: 继续
-
-XIAOFlow: [Stage 4 → Stage 5 → Stage 6]
-         XIAOFlow 完成。
-```
-
----
+使用 `node <skill-root>/scripts/state.mjs mode <state-file> <fast|standard>` 持久化升级。升级保留已有工件，但会回到需要补齐的最早阶段。模式升级不替代敏感操作授权。
 
 ## 异常处理
 
 | 情况 | 处理 |
 |------|------|
-| brainstorming 发现需求过于复杂 | 建议拆分为多个独立子需求，各自启动 xiaoflow |
-| openspec-propose 中断无新信息 | 重新执行 Stage 2，openspec 从 CLI 状态续接 |
-| openspec-propose 中断需补充信息 | 先编辑已有工件，再重新执行 Stage 2 |
-| opsx:propose 工件不完整 | 直接编辑工件后继续 |
-| writing-plans 中断需补充信息 | 补充信息后重新执行 Stage 3，覆盖已有计划文件 |
-| writing-plans 有 TODO/占位符 | 要求重写对应 step |
-| subagent-driven 任务间中断 | 从 Plan 文件中下一个未标记 `[x]` 的 Task 继续 |
-| subagent-driven 任务内中断（有残留代码） | `git stash` 保留进度，询问用户选择：重新开始（丢弃 stash）或恢复继续（stash pop） |
-| subagent-driven 遇到阻塞 | 使用 `superpowers:systematic-debugging` |
-| verification 中断后恢复 | 重新执行 Stage 5（幂等操作，安全重跑） |
-| verification 验证失败 | 回 Stage 4 修复 |
-| 实现中发现规范有误 | 更新 OpenSpec 工件后继续（OpenSpec 支持 fluid 更新） |
-
----
+| Git、OpenSpec CLI 或必需 Skill 缺失 | 写文件前停止，列出缺失项和检测证据 |
+| 状态文件与实际文件冲突 | 用 `state.mjs check` 定位漂移，再用 `state.mjs stage` 回退到最早未满足退出条件的 Stage |
+| 多个活跃 change | 列出候选 change-name，询问用户选择 |
+| Stage 1 需求过大 | 建议拆分独立 change，未经用户选择不擅自拆分 |
+| Stage 2 中断或工件不完整 | 继续 Stage 2，通过 `openspec-propose` 同步补齐所有相关工件 |
+| Stage 3 中断 | 从缺失 capability 继续，不覆盖已完成或用户编辑的 Plan 内容 |
+| Stage 3 出现 TODO、未知路径或 task 映射错误 | 留在 Stage 3，调查并修正；同一 OpenSpec task 可以关联多个 Plan Task，但不能零映射 |
+| Stage 4 任务间中断 | 从首个未完成且依赖满足的 Plan Task 继续 |
+| Stage 4 任务内中断 | 保留当前工作树和 `currentTask`，检查 diff 后继续；不自动 stash 或丢弃修改 |
+| Stage 4 调试阻塞 | 优先使用可用的 `superpowers:systematic-debugging`，否则执行系统化诊断；然后重跑当前 Task 的测试和审查 |
+| 实现中发现规范错误或范围变化 | 回 Stage 2 更新 OpenSpec；Standard/Fast 重做 Stage 3，Mini 重新确认是否仍满足短路径 |
+| 发现外部并发修改 | 报告文件和重叠范围；可隔离则继续，否则等待用户处理 |
+| Stage 5 验证失败 | 规范问题回 Stage 2，Plan 问题回 Stage 3，实现问题回 Stage 4 |
+| Stage 5 发现提前 commit | 报告 `baseCommit..HEAD` 精确范围，不自动 reset 或改写历史 |
+| Stage 6 归档失败 | 保持 `active/Stage 6`，修复归档后再决定 commit |
+| Stage 6 归档成功但 commit 失败 | 保持 `archived + pendingAction: commit`，不要标记 completed；修复后只重试 scoped commit |
 
 ## 使用示例
 
 ### 标准流程
 
+```text
+用户: /xiao-flow 开发用户认证系统，支持邮箱注册、JWT、密码加密
+
+XIAOFlow: [前置检查：规则、依赖、Git 基线]
+          [Stage 1：设计文档与 change-name 已确认]
+          [Stage 2：OpenSpec 工件完整，任务粒度已确认]
+          [Stage 3：Plan 已生成，8/8 OpenSpec tasks 已映射]
+          [Stage 4：逐 Task TDD + 两阶段审查]
+          [Stage 5：规范、测试、静态检查、Git 边界验证通过]
+          Stage 6 请选择：归档 + commit / 只归档
 ```
-用户: /xiaoflow 开发用户认证系统，支持邮箱注册、JWT、密码加密
 
-XIAOFlow: [前置检查 ✓]
-         [Stage 1: brainstorming → 设计文档已保存]
-         Stage 1 完成。建议 change-name: user-auth
-         继续？(继续/修改)
+### Mini
 
-用户: 继续
-XIAOFlow: [Stage 2: openspec-propose → 工件已生成]
-         Stage 2 完成。8 个任务。
-         继续？(继续/修改)
+```text
+用户: /xiao-flow mini 给 User 模型添加可选的 displayName 字段
 
-用户: 继续
-XIAOFlow: [Stage 3: writing-plans → 计划已生成]
-         Stage 3 完成。32 个 step。
-         继续？(继续/修改)
-
-用户: 继续
-XIAOFlow: [Stage 4: subagent-driven → 逐任务执行 + 两阶段审查]
-         Stage 4 完成。
-         继续？(继续)
-
-用户: 继续
-XIAOFlow: [Stage 5: verification → 验证通过]
-         Stage 5 完成。执行 commit 和归档？(继续)
-
-用户: 继续
-XIAOFlow: [commit + Stage 6: archive]
-         XIAOFlow 完成。
+XIAOFlow: [前置检查通过]
+          [Stage 1：内联调查，确认精简设计和 change-name]
+          [Stage 2：OpenSpec 工件与 planning 快照完成]
+          [Stage 4：按唯一 task 完成 inline TDD]
+          - Change: add-user-display-name
+          - OpenSpec tasks: 1
+          - 独立 Plan: skipped
+          [Stage 5：验证通过]
+          请选择归档方式：归档 + commit / 只归档
 ```

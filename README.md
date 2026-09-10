@@ -6,7 +6,7 @@ XIAO 团队的 Claude Code Skills 合集。
 
 | Skill | 说明 |
 |-------|------|
-| [xiao-flow](skills/xiao-flow/) | 开发工作流，一条命令从需求到交付。编排 OpenSpec + Superpowers。 |
+| [xiao-flow](skills/xiao-flow/) | 分阶段开发工作流，编排 OpenSpec + Superpowers，支持状态恢复、Mini 短路径、漂移检测和范围化提交。 |
 
 ## 安装
 
@@ -32,6 +32,7 @@ cp -r xiao-skills/skills/xiao-flow ~/.claude/skills/
 
 ### 前置依赖
 
+- Node.js
 - [OpenSpec CLI](https://github.com/openspec-dev/openspec)
 - [Superpowers skills](https://github.com/anthropics/skills)
 
@@ -39,6 +40,7 @@ cp -r xiao-skills/skills/xiao-flow ~/.claude/skills/
 
 ```
 /xiao-flow <需求描述>
+/xiao-flow 继续 <change-name>
 ```
 
 ### 6 个阶段
@@ -54,8 +56,16 @@ Stage 6: 归档 (openspec-archive-change)
 
 ### 快速模式
 
-- **快速模式**（2-3 个任务）：精简 brainstorming，其余阶段正常
-- **迷你模式**（1 个任务）：合并 Stage 1+2+3，直接执行
+- **Fast**（2–3 个低风险 OpenSpec task）：保留完整 Plan 和 SDD，连续执行相邻阶段以减少确认轮次
+- **Mini**（1 个独立低风险 task）：使用 `1 → 2 → 4 → 5 → 6` 短路径，跳过独立 Plan 和实现子代理
+
+状态由 `scripts/state.mjs` 原子更新；planning、plan、verification 三类快照会在恢复和阶段切换时检测工件漂移。
+
+### 维护验证
+
+```bash
+node skills/xiao-flow/scripts/validate.mjs
+```
 
 ## License
 

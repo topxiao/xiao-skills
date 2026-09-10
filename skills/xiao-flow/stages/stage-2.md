@@ -1,6 +1,6 @@
 # Stage 2: 规范生成 → `openspec-propose`
 
-## 上下文
+## 调用上下文
 
 ```
 使用 openspec-propose 技能创建变更 "<change-name>"。
@@ -9,45 +9,55 @@
 docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md
 
 请先读取上述设计文档完整内容，基于其中所有需求要点生成 OpenSpec 工件。
-不要摘要或压缩设计文档内容，确保所有需求细节完整传递。
+保持需求语义、约束和验收条件完整，不自行扩展范围。
 
 如果设计文档中缺少生成 OpenSpec 工件所需的关键技术细节（如接口约定、数据结构、技术选型），应主动澄清这些具体信息。
+
+完成后返回 XIAOFlow，不运行 /opsx:apply，不 commit。
 ```
 
 ## 产出
 
 `openspec/changes/<change-name>/` 下：proposal.md, design.md, specs/, tasks.md
 
+## 完整性检查
+
+1. 运行 `openspec status --json`，确认 proposal、design、specs、tasks 全部完成。
+2. 核对 Stage 1 的需求、约束和验收条件在 OpenSpec 工件中均可追踪。
+3. 工件不完整时留在 Stage 2，使用 `openspec-propose` 补齐；不要只手工修改单个文件后直接进入下一阶段。
+
 ## 完成
 
-汇报工件列表和 capability 数。然后**引导用户审查任务粒度**：
+汇报工件列表、capability 数和 OpenSpec task 数，并执行以下粒度审查：
 
 ```
 ## Stage 2 完成
 
 工件列表：proposal.md, design.md, specs/, tasks.md
 Capability 数：N 个
+OpenSpec Task 数：M 个
 
 ### 任务粒度审查
 
 请检查 specs/ 中的 capability 拆分是否合理：
 
-- 每个 capability 应该是可独立验证的功能单元（不是"做所有事"）
-- capability 之间应该低耦合、可独立实现
-- 如果某个 capability 满足以下任一条件，考虑拆分：
-  - 横跨 3 个以上独立的技术领域（如同时涉及数据库+API+前端）
-  - 需要 2 个以上不同角色的开发者才能独立验证
-  - 描述中出现 3 个以上并列的"且"连接的需求点
-- 如果多个 capability 强依赖同一个文件且无法并行，考虑合并
+- 每个 capability 都有可独立验证的行为和验收场景
+- tasks.md 中每个 task 都有稳定 ID、明确完成条件和所属 capability
+- 过大的 capability 应拆分；共享同一原子改动、无法独立验证的碎片应合并
+- 依赖顺序在 tasks.md 中表达清楚，不以“可并行”为由强拆耦合任务
 
-是否需要调整？(确认/调整)
 ```
 
-用户选择调整 → 协助编辑 specs/ 目录和 tasks.md，调整完成后重新确认。
+- `standard`：展示审查结果并询问“是否需要调整？(确认/调整)”。
+- `fast`：自动自审；仍为 2–3 个低风险 task 且单一模块时继续，否则调用 `state.mjs mode ... standard` 并等待确认。
+- `mini`：必须恰好一个 task、一个 capability 且无高风险边界。出现 2–3 个低风险 task 时升级 Fast；其他情况升级 Standard。
 
-如果满足以下**全部条件**，建议快速模式：
-- capability 数 ≤ 3
-- 单一技术领域（如纯后端 / 纯前端 / 纯配置变更）
-- proposal.md 中 "What Changes" 段落 ≤ 5 个要点
+需要调整时，通过 `openspec-propose` 同步更新所有受影响工件，再重复完整性检查，避免 proposal、design、specs 和 tasks 互相矛盾。
 
-用户确认 → Stage 3。
+审查通过后，对 proposal、design、tasks 和每个 spec 的精确路径生成 `planning` 快照。Stage 1 设计输入不进入该快照；OpenSpec 从此成为唯一规范源。
+
+退出条件满足后：
+
+- `standard`：运行 `state.mjs stage ... 3`，等待用户确认后进入 Stage 3。
+- `fast`：运行 `state.mjs stage ... 3`，根据 Stage 1 授权直接进入 Stage 3。
+- `mini`：运行 `state.mjs stage ... 4`，跳过 Stage 3，进入 inline TDD。

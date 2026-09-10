@@ -1,0 +1,164 @@
+{
+  "skill_name": "xiao-flow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/xiao-flow 给现有 Node 服务增加审计日志。仓库有 AGENTS.md，但当前环境没有 openspec 命令。请开始执行。",
+      "expected_output": "在任何写操作前读取项目规则并完成依赖检查；明确报告 OpenSpec CLI 缺失，不创建设计、状态或 OpenSpec 文件。",
+      "files": [],
+      "expectations": [
+        "在写文件前检查并读取 AGENTS.md 或同级项目规则",
+        "检测并明确报告 openspec CLI 缺失",
+        "依赖缺失时停止，不创建工作流工件",
+        "不假设依赖已经预安装"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/xiao-flow 继续 user-auth。状态文件 nextStage=4，planPath 指向昨天生成的计划；Plan 有 4 个完整 Task，但目前 0 个被勾选。",
+      "expected_output": "验证 Plan 完整性后进入 Stage 4，从 Task 1 开始，不因零个 checkbox 已完成而重跑 Stage 3，也不按今天日期寻找新 Plan。",
+      "files": [],
+      "expectations": [
+        "使用状态文件记录的 planPath",
+        "验证 Plan 的 OpenSpec task 映射和完整性",
+        "路由到 Stage 4 而不是 Stage 3",
+        "不覆盖或重新生成已有完整 Plan"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/xiao-flow 继续 add-search。openspec/changes/add-search/ 只有 proposal.md 和一个 spec，design.md、tasks.md 尚未生成，也没有状态文件。",
+      "expected_output": "按兼容恢复规则识别为 OpenSpec 工件不完整，进入 Stage 2 补齐并同步工件，而不是进入 Stage 3。",
+      "files": [],
+      "expectations": [
+        "排除 archive 后识别 add-search 为活跃 change",
+        "将部分 OpenSpec 工件路由到 Stage 2",
+        "不在缺少 design.md 和 tasks.md 时生成 Plan",
+        "恢复点确认后补建状态文件"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/xiao-flow 继续 billing-fix。Stage 4 的 Task 2 做到一半，工作树有实现修改；启动前另有用户自己的 notes.md 修改。",
+      "expected_output": "保留当前工作树和用户既有修改，从 currentTask 恢复；不得自动 stash、reset、删除 worktree 或暂存 notes.md。",
+      "files": [],
+      "expectations": [
+        "读取 currentTask 并检查当前 diff",
+        "保留任务内未完成代码继续执行",
+        "不 stash、reset 或清理 worktree",
+        "把 notes.md 识别为 initialDirtyPaths 并排除在工作流提交范围外"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/xiao-flow 继续 checkout-api。Plan 全部完成，OpenSpec tasks.md 中保留 1.1、1.2、2.1 三条原任务；baseCommit 之后出现一个未经流程授权的 commit。请执行 Stage 5。",
+      "expected_output": "按 Plan 中的 OpenSpec task ID 仅更新原 checkbox，逐 spec 场景验证，并报告 baseCommit..HEAD 的精确 commit，不自动改写历史。",
+      "files": [],
+      "expectations": [
+        "每个 Plan Task 恰好映射一个已知 OpenSpec task，且每个 OpenSpec task 至少被映射一次",
+        "只修改 tasks.md 原 checkbox，不重写文本、顺序或层级",
+        "验证 specs 中每个 capability 的验收场景",
+        "报告 baseCommit..HEAD 的 commit 且不自动 reset"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "/xiao-flow 继续 profile-page。Stage 5 已通过，用户选择“归档 + commit”；工作树还包含启动前已有的 local-notes.txt 修改。",
+      "expected_output": "验证归档后只暂存当前 change 的精确路径，保留 local-notes.txt，不清理其他 worktree，并允许最终工作树因既有修改而非空。",
+      "files": [],
+      "expectations": [
+        "归档前确认 verifiedAt 和 OpenSpec 完成状态",
+        "归档前检查 verification 快照并在 hash 变化时返回 Stage 5",
+        "不把 local-notes.txt 纳入暂存或提交",
+        "使用精确路径暂存而不是 git add .",
+        "不清理 worktree，且不要求无关修改消失",
+        "归档成功后先进入 archived，commit 成功并记录 hash 后才标记 completed"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "/xiao-flow 继续。docs/superpowers/xiao-flow/ 下有 order-api 和 user-search 两个 active 状态文件，用户没有提供 change-name。",
+      "expected_output": "列出两个候选 change-name 并等待用户选择，不根据文件时间、目录顺序或最近 Git 修改自行猜测。",
+      "files": [],
+      "expectations": [
+        "列出 order-api 和 user-search 两个候选项",
+        "在读取具体 Stage 或写文件前请求用户选择",
+        "不根据时间或排序自动选择 change",
+        "不把 archive 目录视为活跃 change"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "/xiao-flow mini 给现有 User 类型增加一个可选 displayName 字段。代码和测试位置明确，不涉及数据库、API 或权限。",
+      "expected_output": "使用 Mini 的 1→2→4→5→6 短路径：完成精简边界调查和 OpenSpec 后跳过独立 Plan 与实现子代理，按唯一 task inline TDD。",
+      "files": [],
+      "expectations": [
+        "Mini Stage 1 不调用 brainstorming Skill",
+        "Stage 2 仍生成并检查完整 OpenSpec 工件",
+        "从 Stage 2 直接转换到 Stage 4",
+        "不创建独立 Plan，不调用 subagent-driven-development",
+        "完成 inline TDD 后进入 Stage 5 验证"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "/xiao-flow mini 增加导出功能。Stage 2 生成后发现有 3 个低风险 task，都在同一个模块内。",
+      "expected_output": "把 Mini 升级为 Fast，保留已有 OpenSpec 工件并进入 Stage 3 生成精简 Plan，不直接实现，也不升级为 Standard。",
+      "files": [],
+      "expectations": [
+        "执行 mini 到 fast 的单向模式升级",
+        "保留已经生成的 OpenSpec 工件",
+        "进入 Stage 3 补建 Plan",
+        "不跳过规划直接进入 Stage 4"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "/xiao-flow 继续 order-api。状态为 Stage 4，但 Stage 3 结束后有人修改了 specs/order/spec.md 的验收条件，Plan 没更新。",
+      "expected_output": "planning 快照检查失败，停止实现并回 Stage 2 复核工件；Standard/Fast 随后重做 Stage 3，不使用旧 Plan。",
+      "files": [],
+      "expectations": [
+        "在实现前检查 planning 快照",
+        "报告发生漂移的具体 spec 路径",
+        "回退 Stage 2 并失效下游快照",
+        "不继续执行旧 Plan"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "/xiao-flow 为 OpenSpec task 2.1 生成计划。该任务需要分别修改存储层、服务层和 API 测试，适合拆成 3 个有依赖的 Plan Task。",
+      "expected_output": "允许 3 个 Plan Task 都映射到 OpenSpec task 2.1；每个 Plan Task 只写一个已知 ID，Stage 5 等三个任务全部完成后再勾选 2.1。",
+      "files": [],
+      "expectations": [
+        "允许一个 OpenSpec task 对应多个 Plan Task",
+        "每个 Plan Task 恰好记录一个 OpenSpec task ID",
+        "依赖关系在 Plan 中明确",
+        "只有全部关联 Plan Task 完成后才同步 OpenSpec checkbox"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "/xiao-flow 继续 payment-fix。Stage 6 归档已成功，用户选择了归档 + commit，但 git commit 因 hook 失败。",
+      "expected_output": "状态保持 archived 和 pendingAction=commit，不重新归档、不标记 completed；修复 hook 后仅重试精确范围 commit。",
+      "files": [],
+      "expectations": [
+        "commit 失败后状态不是 completed",
+        "保留 archivePath 和 pendingAction=commit",
+        "恢复时不再次运行归档",
+        "只重试 scoped commit，成功后记录实际 commit hash"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "/xiao-flow 继续 search-cache。Stage 4 正常把 Plan 标题从 ### Task 1 改成 ### [x] Task 1，同时 Stage 5 把 tasks.md 的 checkbox 勾选；其他文字没有变化。",
+      "expected_output": "plan 和 planning 快照仍通过，因为只忽略受控的进度标记；如果任务文本、路径或验收条件变化则必须报告漂移。",
+      "files": [],
+      "expectations": [
+        "Plan Task checkbox 变化不触发 plan 漂移",
+        "OpenSpec tasks checkbox 变化不触发 planning 漂移",
+        "任务文本或需求变化仍会触发漂移",
+        "不会通过忽略整个文件来规避检测"
+      ]
+    }
+  ]
+}
