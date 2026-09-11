@@ -52,6 +52,7 @@ node <skill-root>/scripts/state.mjs archive <state-file> <archivePath> <archive-
 1. `designPath` 对应的文件存在 → 移动到 `<archivePath>/design-input.md`，删除原文件。
 2. `planPath` 对应的文件存在（Standard/Fast）→ 移动到 `<archivePath>/plan.md`，删除原文件。
 3. 移动后若原目录（如 `docs/superpowers/specs/`、`docs/superpowers/plans/`）变空，一并删除空目录。
+4. `.superpowers/` 目录存在 → 整个删除。该目录是 SDD skill 的运行时工作区（brief、report、review diff、progress），不属于项目产物。
 
 后续 commit 的精确路径应包含归档目录中的新文件和原路径的删除。
 

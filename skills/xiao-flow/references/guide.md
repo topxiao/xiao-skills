@@ -12,25 +12,7 @@
 | Fast | 2–3 个低风险 OpenSpec task、单一模块 | 1 → 2 → 3 → 4 → 5 → 6 | 精简 Plan + SDD，减少确认轮次 |
 | Mini | 1 个低风险、可独立验证的 OpenSpec task | 1 → 2 → 4 → 5 → 6 | 无独立 Plan，inline TDD |
 
-### Standard（默认）
-
-Stage 1、2、3、4 分别汇报并等待确认；Stage 5 通过后进入 Stage 6，由用户选择归档方式。
-
-### Fast（加速完整路径）
-
-- Stage 1 使用 `superpowers:brainstorming`，聚焦边界和推荐方案。
-- Stage 1 获得确认后连续执行 Stage 2–3；Stage 2 自动完成粒度自审，仅在边界不满足时暂停。
-- Stage 3 仍保留 OpenSpec task 映射、代码调查、验证命令和独立 Plan，但压缩解释性文字。
-- Stage 3 确认后连续执行 Stage 4–5；验证通过后再询问归档方式。
-
-### Mini（真正短路径）
-
-- 只在用户显式选择或边界完全明确时使用。
-- Stage 1 不调用 brainstorming Skill；XIAOFlow 调查相关代码后生成一份精简设计输入，只记录问题、范围、非目标、文件边界和验证方式。
-- Stage 2 仍生成完整 OpenSpec 工件，并确认只有一个 task、一个 capability、无高风险边界。
-- Stage 2 保存 `planning` 快照后直接转换到 Stage 4，不生成独立 Plan。
-- Stage 4 由当前 Agent 根据唯一 OpenSpec task/spec 做 inline TDD；不分派实现子代理。
-- Stage 5–6 与其他模式相同。
+Standard 在 Stage 1、2、3、4 分别汇报并等待确认。Fast 获 Stage 1 确认后连续执行 2–3，获 Stage 3 确认后连续执行 4–5。Mini 不调用 brainstorming，Stage 1 由 XIAOFlow 内联调查生成精简设计输入（问题、范围、非目标、预计文件和验证方式），Stage 2 后直接进入 Stage 4 inline TDD。
 
 ### 升级规则
 
@@ -53,15 +35,3 @@ Stage 1、2、3、4 分别汇报并等待确认；Stage 5 通过后进入 Stage 
 | Stage 1 需求过大 | 建议拆分独立 change，未经用户选择不擅自拆分 |
 | 发现外部并发修改 | 报告文件和重叠范围；可隔离则继续，否则等待用户处理 |
 
-## 使用示例
-
-```text
-用户: /xiao-flow mini 给 User 模型添加可选的 displayName 字段
-
-XIAOFlow: [前置检查通过]
-          [Stage 1：内联调查，确认精简设计和 change-name]
-          [Stage 2：OpenSpec 工件与 planning 快照完成]
-          [Stage 4：按唯一 task 完成 inline TDD]
-          [Stage 5：验证通过]
-          请选择归档方式：归档 + commit / 只归档
-```

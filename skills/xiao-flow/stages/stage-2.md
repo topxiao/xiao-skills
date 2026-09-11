@@ -28,25 +28,11 @@ docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md
 
 ## 完成
 
-汇报工件列表、capability 数和 OpenSpec task 数，并执行以下粒度审查：
-
-```
-## Stage 2 完成
-
-工件列表：proposal.md, design.md, specs/, tasks.md
-Capability 数：N 个
-OpenSpec Task 数：M 个
-
-### 任务粒度审查
-
-请检查 specs/ 中的 capability 拆分是否合理：
-
-- 每个 capability 都有可独立验证的行为和验收场景
-- tasks.md 中每个 task 都有稳定 ID、明确完成条件和所属 capability
-- 过大的 capability 应拆分；共享同一原子改动、无法独立验证的碎片应合并
-- 依赖顺序在 tasks.md 中表达清楚，不以“可并行”为由强拆耦合任务
-
-```
+汇报工件列表、Capability 数和 OpenSpec Task 数，并执行任务粒度审查：
+- 每个 capability 有可独立验证的行为和验收场景
+- tasks.md 中每个 task 有稳定 ID、明确完成条件和所属 capability
+- 过大 capability 拆分；无法独立验证的碎片合并
+- 依赖顺序在 tasks.md 表达清楚，不强拆耦合任务
 
 - `standard`：展示审查结果并询问“是否需要调整？(确认/调整)”。
 - `fast`：自动自审；仍为 2–3 个低风险 task 且单一模块时继续，否则调用 `state.mjs mode ... standard` 并等待确认。

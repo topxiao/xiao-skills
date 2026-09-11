@@ -11,15 +11,19 @@ metadata:
 
 **XIAOFlow** 是 OpenSpec + Superpowers 的阶段编排器。它负责阶段边界、恢复、漂移检测和安全约束，不重新实现被调用 Skill 的专业逻辑。
 
-> 激活后立即完整读取 `references/orchestration-rules.md`。首次执行或恢复任务时，再读取 `references/state-and-recovery.md`。两者的编排约束优先于被调用 Skill 的默认阶段跳转。
+> 首次执行或恢复任务时，读取 `references/state-and-recovery.md`。全局原则中的编排约束优先于被调用 Skill 的默认阶段跳转。
 
 ## 全局原则
 
 - 先读取当前目录及目标文件作用域内的 `CLAUDE.md`、`AGENTS.md` 和项目规则，再进行任何写操作。
-- 状态文件只是恢复线索；通过 `scripts/state.mjs` 原子更新，并用实际文件、OpenSpec 状态和 Git 状态验证。
-- Stage 6 之前不 commit。不要自动 stash、reset、删除 worktree，或覆盖用户修改过的计划。
+- 状态文件只是恢复线索；通过 `scripts/state.mjs` 原子更新，并用实际文件、OpenSpec 状态和 Git 状态验证。不要手工改写 JSON 绕过合法转换。
+- Stage 6 之前不 commit，包括实现子代理。不要自动 stash、reset、删除 worktree，或覆盖用户修改过的计划。
 - 只处理当前 change 的文件。启动前已存在的未提交修改属于用户，默认不纳入提交。
 - 每个 Stage 达成退出条件后才更新状态，再按当前模式决定是否等待用户确认。
+- 被调用 Skill 完成后必须返回 XIAOFlow，不得自行跳转到下一阶段或触发 commit。XIAOFlow 负责提供完整输入、检查退出条件并决定下一阶段。
+- 不并行分派实现任务；并行只允许用于互不修改文件的只读调查或调试取证。
+- `superpowers:subagent-driven-development` 的进度只更新 Plan Task 和 `currentTask`，不直接更新 `tasks.md`；每个 Task 通过针对性测试和两阶段审查后才标记 `[x]`。
+- `superpowers:verification-before-completion` 只接受本次运行的新鲜命令输出，不用推断或历史结果代替。
 
 ## 前置检查
 
@@ -43,7 +47,9 @@ metadata:
 
 ## 状态与恢复
 
-用户确认 change-name 后，通过 `node <skill-root>/scripts/state.mjs init ...` 在 `.xiao-flow/<change-name>.json` 创建状态文件。目录只保存每个 change 的本地编排状态，文件名必须与 change-name 完全一致；init 时自动追加 `.gitignore`，不保存密钥、文件内容或完整日志。
+用户确认 change-name 后，通过 `node <skill-root>/scripts/state.mjs init ...` 在 `.xiao-flow/<change-name>.json` 创建状态文件。目录只保存每个 change 的本地编排状态，文件名必须与 change-name 完全一致；init 时自动追加 `.gitignore`（覆盖 `.xiao-flow/` 和 `.superpowers/`），不保存密钥、文件内容或完整日志。
+
+`superpowers:subagent-driven-development` 在 Stage 4 执行期间会在 `.superpowers/sdd/` 下生成 brief、report、review diff 和 progress 等工作文件。该目录是运行时临时产物，不应纳入版本控制；Stage 6 归档完成后应清理。
 
 使用 `/xiao-flow 继续 <change-name>` 恢复。优先读取状态文件并验证对应 Stage 的退出条件；状态缺失、过期或冲突时，按 `references/state-and-recovery.md` 的文件证据恢复到最早未完成阶段。不要仅凭 Plan 中是否存在 `[x]` 决定重写计划。
 
@@ -66,3 +72,4 @@ metadata:
 - 模式、异常处理和示例：`references/guide.md`
 - 状态命令：`node <skill-root>/scripts/state.mjs help`
 - 维护验证：`node scripts/validate.mjs` 和 `node --test scripts/state.test.mjs`
+- `scripts/` 下的文件是 CLI 工具，通过 `node` 命令执行，不要读取源码来理解其行为。

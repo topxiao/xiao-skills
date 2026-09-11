@@ -19,42 +19,16 @@
 ```json
 {
   "schemaVersion": 2,
-  "changeName": "user-auth",
-  "mode": "standard",
-  "status": "active",
-  "nextStage": 2,
-  "projectRoot": "<absolute-project-root>",
-  "baseCommit": "<git-hash-or-UNBORN>",
-  "initialDirtyPaths": [],
-  "initialDirtySnapshot": null,
-  "designPath": "docs/superpowers/specs/2026-09-10-user-auth-design.md",
-  "planPath": null,
-  "currentTask": null,
-  "completedTasks": [],
-  "verifiedAt": null,
-  "snapshots": {
-    "planning": null,
-    "plan": null,
-    "verification": null
-  },
-  "archivePath": null,
-  "archiveMode": null,
-  "pendingAction": null,
-  "commitHash": null,
-  "archivedAt": null,
-  "completedAt": null
+  "changeName": "...", "mode": "standard|fast|mini", "status": "active|archived|completed",
+  "nextStage": 2, "projectRoot": "...", "baseCommit": "<hash|UNBORN>",
+  "initialDirtyPaths": [], "initialDirtySnapshot": null,
+  "designPath": "...", "planPath": null, "currentTask": null, "completedTasks": [],
+  "verifiedAt": null, "snapshots": { "planning": null, "plan": null, "verification": null },
+  "archivePath": null, "pendingAction": null, "commitHash": null
 }
 ```
 
-字段规则：
-
-- `mode`：`standard`、`fast` 或 `mini`；只能按 `mini → fast → standard` 升级。
-- `status`：`active`、`archived` 或 `completed`。归档成功但可选 commit 尚未成功时必须保持 `archived`。
-- `nextStage`：`active` 时是模式允许的下一阶段；其他状态必须为 `null`。
-- `initialDirtySnapshot` 保存启动前脏文件的 hash，帮助识别同路径后续变化；它不能自动拆分同一文件中的不同所有者修改。
-- `designPath` 和 `planPath` 一经确定便跨日期复用。Mini 的 `planPath` 为 `null`。
-- `completedTasks` 主要供 Mini 记录唯一 OpenSpec task；Standard/Fast 仍以 Plan checkbox 为执行进度。
-- 状态文件本身不进入任何 snapshot，避免自引用 hash。
+字段规则：`mode` 只能按 `mini → fast → standard` 升级。`status` 归档但 commit 未成功时保持 `archived`。`initialDirtySnapshot` 保存启动前脏文件 hash。`designPath`/`planPath` 一经确定跨日期复用（Mini 的 `planPath` 为 `null`）。状态文件本身不进入任何 snapshot。
 
 ## 快照和漂移
 
@@ -66,18 +40,7 @@
 
 `planning` 对 OpenSpec `tasks.md` 的 checkbox、`plan` 对 `### [x] Task` 进度标记做归一化，因此正常勾选不会被误判为范围漂移；文本、路径、步骤和需求变化仍会触发漂移。
 
-生成和检查示例：
-
-```bash
-node <skill-root>/scripts/state.mjs snapshot <state-file> planning <proposal> <design> <tasks> <spec...>
-node <skill-root>/scripts/state.mjs snapshot <state-file> plan <planPath>
-node <skill-root>/scripts/state.mjs snapshot <state-file> verification <change-owned-path...>
-node <skill-root>/scripts/state.mjs check <state-file> planning
-node <skill-root>/scripts/state.mjs check <state-file> plan
-node <skill-root>/scripts/state.mjs check <state-file> verification
-```
-
-快照路径必须位于 `projectRoot` 下。文件删除记录为 `DELETED`；新增文件只有显式加入快照后才受保护，所以 Stage 5 必须先根据 scoped diff、Plan 文件清单和 OpenSpec 工件构造完整路径集合。
+快照操作：`state.mjs snapshot <state-file> <slot> <path...>` 生成，`state.mjs check <state-file> <slot>` 检查。路径必须位于 `projectRoot` 下。文件删除记录为 `DELETED`；新增文件只有显式加入快照后才受保护，所以 Stage 5 必须先构造完整路径集合。
 
 ## 合法转换
 
@@ -86,19 +49,7 @@ standard/fast: Stage 2 → 3 → 4 → 5 → 6 → archived → completed
 mini:          Stage 2 ─────→ 4 → 5 → 6 → archived → completed
 ```
 
-常用命令：
-
-```bash
-node <skill-root>/scripts/state.mjs init <state-file> --change <name> --mode <mode> --base <sha-or-UNBORN> --root <repo-root> --design <path-or-NONE> [--dirty <path>]...
-node <skill-root>/scripts/state.mjs stage <state-file> <stage-number>
-node <skill-root>/scripts/state.mjs plan <state-file> <planPath>
-node <skill-root>/scripts/state.mjs task <state-file> <task-id-or-NONE>
-node <skill-root>/scripts/state.mjs complete-task <state-file> <task-id>
-node <skill-root>/scripts/state.mjs verified <state-file>
-node <skill-root>/scripts/state.mjs mode <state-file> <fast-or-standard>
-```
-
-脚本禁止向前跨阶段；允许按证据回退，并自动清除目标阶段之后的快照、验证和归档字段。回退后仍需按 Stage 文件修正实际工件，脚本不会覆盖 Plan 或源码。
+完整命令用法见 `node <skill-root>/scripts/state.mjs help`，各 Stage 文件包含具体调用。脚本禁止向前跨阶段；允许按证据回退，并自动清除目标阶段之后的快照、验证和归档字段。
 
 ## 状态更新时机
 
