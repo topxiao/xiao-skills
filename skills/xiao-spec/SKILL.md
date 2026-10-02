@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a host that can read Markdown and access project files; Git and subagent tools are optional
 metadata:
   author: "Xiao"
-  version: "1.0.0"
+  version: "1.1.0"
   generatedBy: "xiao-spec"
 ---
 
@@ -18,6 +18,7 @@ Xiao-Spec 是独立的提示词工作流，负责把需求推进到设计、计�
 - 任何写操作前先读取适用的 `CLAUDE.md`、`AGENTS.md` 和项目规则。
 - 阶段按顺序推进；未经用户批准不得跳过设计或计划门。
 - 需求与设计唯一写入 `change.md`；任务定义与进度唯一写入 `implementation-plan.md`。
+- 这两份文档硬折行：每行不超过约 100 个半角字符（汉字约 50），在标点或空格处断行；命令与路径保持一行。同类型并列项（文件、命令、要点等）多于两三项时用列表呈现，不串成长行。
 - 启动前已有修改属于用户，不覆盖、不 stash、不 reset、不自动清理、不擅自暂存。
 - 不把密码、Token、密钥、客户数据或完整日志写入 change、计划或验证证据。
 - 测试、审查和验证必须使用本轮证据；不能用旧日志、推测或 checkbox 代替。

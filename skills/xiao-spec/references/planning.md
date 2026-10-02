@@ -5,6 +5,9 @@
 ## 文件格式
 
 计划与 `change.md` 同目录：`docs/changes/<change-name>/implementation-plan.md`。
+排版遵循 change.md 的排版约定：每行不超过约 100 个半角字符，在标点或空格处折行。
+`Depends on`、`Files`、`Acceptance`、`Verification` 有内容时一律用无序列表，一项一行
+（`Depends on: none` 除外）；命令、路径、URL 不折行，Evidence 中每条命令及输出保持一行。
 
 ```markdown
 # <Change title> Implementation Plan
@@ -18,9 +21,12 @@
 ### Task 1: <stable task name>
 
 **Depends on:** none
-**Files:** <exact files or directories>
-**Acceptance:** <linked requirement/scenario>
-**Verification:** <exact command or inspection>
+**Files:**
+- <exact file or directory>
+**Acceptance:**
+- <linked requirement/scenario>
+**Verification:**
+- <exact command or inspection>
 
 - [ ] Write or update the failing test
 - [ ] Implement the smallest change
@@ -37,9 +43,14 @@ Evidence: <command output and review note>
 ### Task 1: add-csv-export-format
 
 **Depends on:** none
-**Files:** src/export/format.ts, tests/export/format.test.ts
-**Acceptance:** R1（A1、A2）
-**Verification:** npm test -- export；A2 人工导出检查
+**Files:**
+- src/export/format.ts
+- tests/export/format.test.ts
+**Acceptance:**
+- R1（A1、A2）
+**Verification:**
+- npm test -- export
+- A2 人工导出检查
 
 - [x] Write or update the failing test
 - [x] Implement the smallest change

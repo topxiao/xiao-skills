@@ -15,7 +15,7 @@
 
 ```markdown
 ---
-xiao_spec_version: 1.0.0
+xiao_spec_version: 1.1.0
 mode: standard
 phase: design # design|plan|implementation|verification|archive|completed
 status: active # active|blocked|cancelled|completed
@@ -55,6 +55,16 @@ frontmatter 是人工维护的恢复记录，不是自动状态机。`phase` 和
 | Requirements and Scenarios | 每条需求至少一个可观察场景：前置条件 / 操作 / 预期结果 |
 | Acceptance | 验收清单（普通列表，不勾选），逐条对应测试、静态检查、人工检查或用户验收动作；证据写入最终验证报告 |
 | Decisions and Open Questions | 已定决策、待定问题及其影响 |
+
+## 排版约定
+
+这两份文档是给人直接读的源文件，不只看渲染效果，避免超长单行：
+
+- 正文与列表项每行不超过约 100 个半角字符（汉字约 50），在标点或空格处折行。
+- 列表项续行缩进与首行文字对齐，嵌套层级用缩进表达。
+- 内容变长优先拆子列表或子段落，不把多个要点堆进一行。
+- 同类型并列内容（多个文件、命令、要点等）超过约 3 项时改为列表：无顺序用无序列表，有先后步骤用有序列表，不用顿号或逗号串成超长行。
+- 命令、路径、URL 和代码保持一行，不折行。
 
 ## 示例
 
