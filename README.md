@@ -7,7 +7,7 @@ XIAO 团队的 Claude Code Skills 合集。
 | Skill | 说明 |
 |-------|------|
 | [xiao-flow](skills/xiao-flow/) | 分阶段开发工作流，编排 OpenSpec + Superpowers，支持状态恢复、Mini 短路径、漂移检测和范围化提交。 |
-| [xiao-spec](skills/xiao-spec/) | 4.x 纯提示词规格驱动开发工作流，不要求 OpenSpec、Superpowers、Node.js 或自带脚本。 |
+| [xiao-spec](skills/xiao-spec/) | 纯提示词规格驱动开发工作流，不要求 OpenSpec、Superpowers、Node.js 或自带脚本。 |
 
 ## 安装
 
@@ -21,7 +21,7 @@ npx skills add topxiao/xiao-skills --global
 # 仅安装 xiao-flow
 npx skills add topxiao/xiao-skills@xiao-flow
 
-# 仅安装 xiao-spec 4.x
+# 仅安装 xiao-spec
 npx skills add topxiao/xiao-skills@xiao-spec
 ```
 
@@ -30,7 +30,7 @@ npx skills add topxiao/xiao-skills@xiao-spec
 ```bash
 git clone https://github.com/topxiao/xiao-skills.git
 cp -r xiao-skills/skills/xiao-flow ~/.claude/skills/
-# 安装纯提示词版 xiao-spec 4.x
+# 安装纯提示词版 xiao-spec
 cp -r xiao-skills/skills/xiao-spec ~/.claude/skills/
 ```
 
@@ -85,7 +85,7 @@ Stage 1 先 scaffold change 并按 OpenSpec design instructions 写入 `design.m
 node skills/xiao-flow/scripts/validate.mjs
 ```
 
-## xiao-spec 4.x
+## xiao-spec
 
 xiao-spec 是独立的纯提示词规格驱动开发工作流，不要求 OpenSpec、Superpowers、Node.js、Git、子代理或自带脚本。
 

@@ -5,11 +5,11 @@ license: MIT
 compatibility: Requires a host that can read Markdown and access project files; Git and subagent tools are optional
 metadata:
   author: "XIAO"
-  version: "4.1.0"
+  version: "1.0.0"
   generatedBy: "xiao-spec"
 ---
 
-# XIAO-Spec 4.x
+# XIAO-Spec
 
 XIAO-Spec 是独立的提示词工作流，负责把需求推进到设计、计划、实现、验证和归档。它内置需求澄清、结构化验收、任务计划、TDD、系统化调试、双重审查和新鲜验证；任何外部框架、Node.js、Git、子代理和可执行脚本都不是运行前置条件。
 

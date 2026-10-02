@@ -15,7 +15,7 @@
 
 ```markdown
 ---
-xiao_spec_version: 4.1.0
+xiao_spec_version: 1.0.0
 mode: standard
 phase: design # design|plan|implementation|verification|archive|completed
 status: active # active|blocked|cancelled|completed
