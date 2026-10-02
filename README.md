@@ -8,6 +8,7 @@ Xiao 团队的 Claude Code Skills 合集。
 |-------|------|
 | [xiao-flow](skills/xiao-flow/) | 分阶段开发工作流，编排 OpenSpec + Superpowers，支持状态恢复、Mini 短路径、漂移检测和范围化提交。 |
 | [xiao-spec](skills/xiao-spec/) | 纯提示词规格驱动开发工作流，不要求 OpenSpec、Superpowers、Node.js 或自带脚本。 |
+| [cli-creator](skills/cli-creator/) | CLI 项目脚手架生成器，支持 Python (Click) 和 Node (Commander)，可新建项目或追加子命令，生成后强制运行测试。 |
 
 ## 安装
 
@@ -23,6 +24,9 @@ npx skills add topxiao/xiao-skills@xiao-flow
 
 # 仅安装 xiao-spec
 npx skills add topxiao/xiao-skills@xiao-spec
+
+# 仅安装 cli-creator
+npx skills add topxiao/xiao-skills@cli-creator
 ```
 
 手动安装：
@@ -32,6 +36,8 @@ git clone https://github.com/topxiao/xiao-skills.git
 cp -r xiao-skills/skills/xiao-flow ~/.claude/skills/
 # 安装纯提示词版 xiao-spec
 cp -r xiao-skills/skills/xiao-spec ~/.claude/skills/
+# 安装 CLI 脚手架生成器
+cp -r xiao-skills/skills/cli-creator ~/.claude/skills/
 ```
 
 ## xiao-flow 工作流
@@ -110,6 +116,17 @@ docs/changes/<change-name>/
 ```
 
 Git 可用时用于提供更强的范围证据；不可用时仍可执行，但必须说明可信度限制。xiao-spec 不内置评估数据或可执行状态脚本。
+
+## cli-creator
+
+CLI 项目脚手架生成器。用户说"创建 xxx-cli"或"给 xxx-cli 加个子命令"时触发。
+
+```text
+支持栈：Python >=3.9 (Click) / Node >=18 (Commander)
+模式：  新建项目 / 在已有 CLI 项目追加子命令
+```
+
+流程要点：先从描述推导完整方案供用户一次性确认，确认后写入，**写入后必须运行测试（pytest / node --test）全绿才交付**。命令层与业务逻辑分离（`commands/` + `core/`），共享选项和错误处理集中在 `commands/common.*`。
 
 ## License
 
