@@ -40,7 +40,7 @@
 
 `planning` 对 OpenSpec `tasks.md` 的 checkbox 做归一化，因此 Stage 5 的单向完成投影不会被误判为范围漂移。Plan 不做进度归一化：Task 标题、步骤、路径和映射在执行期间保持稳定，任何变化都回 Stage 3 复核。
 
-快照操作：旧命令可用 `state.mjs snapshot <state-file> <slot> <path...>` 生成，`state.mjs check <state-file> <slot>` 检查。阶段边界优先使用批量命令：`state.mjs checkpoint <state-file> planning <target-stage> <path...>`、`checkpoint ... plan <target-stage> <plan-path>`、`checkpoint ... verification <target-stage> <path...>`，一次完成快照、校验和阶段转换；Mini 唯一任务使用 `checkpoint-task <state-file> <task-id>`。路径必须位于 `projectRoot` 下。文件删除记录为 `DELETED`；新增文件只有显式加入快照后才受保护，所以 Stage 5 必须先构造完整路径集合。
+快照操作：旧命令可用 `state.mjs snapshot <state-file> <slot> <path...>` 生成，`state.mjs check <state-file> <slot>` 检查。阶段边界优先使用批量命令：`state.mjs checkpoint <state-file> planning <target-stage> <path...>`、`checkpoint ... plan <target-stage> <plan-path>`、`checkpoint ... verification <target-stage> <path...>`，一次完成快照、校验和阶段转换。Mini 用 `task` 保存当前进行项、`complete-task` 记录完成并清空当前项。路径必须位于 `projectRoot` 下。文件删除记录为 `DELETED`；新增文件只有显式加入快照后才受保护，所以 Stage 5 必须先构造完整路径集合。
 
 ## 合法转换
 
@@ -51,20 +51,13 @@ mini:          Stage 1 → 2 ─────→ 4 → 5 → 6 → archived → c
 
 完整命令用法见 `node <skill-root>/scripts/state.mjs help`，各 Stage 文件包含具体调用。脚本禁止向前跨阶段；允许按证据回退，并自动清除目标阶段之后的快照、验证和归档字段。
 
-## 状态更新时机
+## 状态转换摘要
 
-| 事件 | 操作 |
-|------|------|
-| Stage 1 准备 | 执行 `openspec new change`，读取 design instructions，`init --stage 1 --design <resolvedOutputPath>` |
-| Stage 1 设计获批 | 保存 design-only `planning` 基线，`stage <state-file> 2` |
-| Stage 2 完成 | 检查 design-only 基线，验证工件后用 `checkpoint planning` 扩展完整快照；Standard/Fast 转 3，Mini 转 4 |
-| Stage 3 完成 | `checkpoint plan` 记录 `planPath`、保存快照并转 4 |
-| Stage 4 执行中 | Standard/Fast 由 SDD ledger 记录 `Task N: complete`；Mini 使用 `task` 和 `checkpoint-task` |
-| Stage 4 完成 | Standard/Fast 依据 ledger 检查完成；Mini 清空 `currentTask`，转 5 |
-| Stage 5 通过 | `checkpoint verification` 保存快照、写入 verifiedAt 并转 6 |
-| Stage 6 归档 | 调用 `archive <state> <archivePath> <archive-only|commit>` |
-| 无需 commit | 调用 `complete <state>` |
-| commit 成功 | 调用 `complete <state> <commitHash>` |
+阶段操作与具体命令以对应的 `stages/stage-N.md` 为准；此处只记录恢复时需要的合法顺序：
+
+- Standard/Fast：`1 → 2 → 3 → 4 → 5 → 6`
+- Mini：`1 → 2 → 4 → 5 → 6`
+- Stage 6 先归档；选择 commit 时状态暂存为 `archived + pendingAction: commit`，成功后才进入 `completed`。
 
 状态文件无法解析或 schema 不受支持时，脚本会拒绝写入。不要覆盖原文件；先报告错误，再按实际工件恢复，由用户决定是否重建控制记录。
 

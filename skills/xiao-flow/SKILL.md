@@ -5,13 +5,13 @@ license: MIT
 compatibility: Requires Node.js, Git, OpenSpec CLI, and the mode-specific OpenSpec/Superpowers skills listed below
 metadata:
   author: "XIAO"
-  version: "3.4"
+  version: "3.4.1"
   generatedBy: "xiao-flow"
 ---
 
 **XIAOFlow** 是 OpenSpec + Superpowers 的阶段编排器。它负责阶段边界、恢复、漂移检测和安全约束，不重新实现被调用 Skill 的专业逻辑。
 
-> 首次执行或恢复任务时，读取 `references/state-and-recovery.md`。全局原则中的编排约束优先于被调用 Skill 的默认阶段跳转。
+> 全局原则中的编排约束优先于被调用 Skill 的默认阶段跳转。仅在恢复、状态冲突或漂移时读取 `references/state-and-recovery.md`；正常新 change 按当前 Stage 文件执行。
 
 ## 全局原则
 
@@ -31,7 +31,7 @@ metadata:
 
 1. 确定 Git 仓库根目录，读取项目规则。
 2. 检查 `node`、`git`、`openspec` CLI。
-3. 根据用户请求和风险边界确定 `standard`、`fast` 或 `mini`；默认 `standard`。模式定义和升级规则见 `references/guide.md`。
+3. 初选模式：明确是单个低风险任务时选 `mini`；预计为 2–3 个同模块低风险任务时选 `fast`；其余或风险不明时选 `standard`。Stage 2 按实际 task 数和风险复核；边界模糊或需要升级时再读 `references/guide.md`。
 4. 按模式检查 Skill：
    - 所有模式：
      - `openspec-propose`（命令别名可能显示为 `/opsx:propose`）
@@ -57,19 +57,19 @@ metadata:
 
 每次只读取当前 Stage 文件；切换后再读取下一 Stage：
 
-| 阶段 | 文件 | Standard / Fast | Mini | 核心退出条件 |
-|------|------|-----------------|------|-------------|
-| Stage 1 | `stages/stage-1.md` | `superpowers:brainstorming` | 内联边界调查 | 已 scaffold change，OpenSpec canonical `design.md` 已由用户确认 |
-| Stage 2 | `stages/stage-2.md` | `openspec-propose` | `openspec-propose` | OpenSpec 工件完整且通过粒度审查 |
-| Stage 3 | `stages/stage-3.md` | `superpowers:writing-plans` | 跳过 | OpenSpec task 均映射到 `implementation-plan.md` |
-| Stage 4 | `stages/stage-4.md` | `superpowers:subagent-driven-development` | 单任务 inline TDD | 实现任务全部通过测试和审查 |
-| Stage 5 | `stages/stage-5.md` | `superpowers:verification-before-completion` | 同左 | 规范、测试、静态检查和 Git 边界均有新鲜证据 |
-| Stage 6 | `stages/stage-6.md` | `openspec-archive-change` | 同左 | change 已归档，按用户选择决定是否 commit |
+| 阶段 | 按需读取 | 阶段职责 |
+|------|----------|----------|
+| 1 | `stages/stage-1.md` | 需求与 canonical design |
+| 2 | `stages/stage-2.md` | OpenSpec 工件 |
+| 3 | `stages/stage-3.md` | Standard/Fast 计划；Mini 跳过 |
+| 4 | `stages/stage-4.md` | TDD 实现 |
+| 5 | `stages/stage-5.md` | 验证 |
+| 6 | `stages/stage-6.md` | 归档与可选 commit |
 
 ## 参考
 
-- 状态字段和恢复优先级：`references/state-and-recovery.md`
-- 模式、异常处理和示例：`references/guide.md`
+- 恢复、状态冲突或漂移：`references/state-and-recovery.md`
+- 模式边界不明、升级或跨阶段异常：`references/guide.md`
 - 状态命令：`node <skill-root>/scripts/state.mjs help`；阶段边界优先使用 `checkpoint` 批量命令
 - 维护验证：`node scripts/validate.mjs` 和 `node --test scripts/state.test.mjs`
 - `scripts/` 下的文件是 CLI 工具，通过 `node` 命令执行，不要读取源码来理解其行为。

@@ -414,19 +414,6 @@ function commandCheckpoint(statePath, slot, args) {
   console.log(`Checkpointed ${slot}; transitioned to Stage ${state.nextStage}`);
 }
 
-function commandCheckpointTask(statePath, taskId) {
-  const state = readState(statePath);
-  if (state.status !== "active" || state.mode !== "mini" || state.nextStage !== 4) {
-    fail("checkpoint-task is only valid for Mini Stage 4");
-  }
-  if (!taskId) fail("checkpoint-task requires a task ID");
-  state.currentTask = taskId;
-  if (!state.completedTasks.includes(taskId)) state.completedTasks.push(taskId);
-  state.currentTask = null;
-  writeStateAtomic(statePath, state);
-  console.log(`Completed Mini task ${taskId}`);
-}
-
 function commandPlan(statePath, planPath) {
   const state = readState(statePath);
   if (state.status !== "active" || state.mode === "mini") {
@@ -573,7 +560,6 @@ function usage() {
   state.mjs init <state-file> --change <name> --mode <mode> --base <sha|UNBORN|NULL> [--root <path>] [--stage <number>] [--design <path|NONE>] [--plan <path|NONE>] [--dirty <path>]... [--dirty-unknown true]
   state.mjs snapshot <state-file> <planning|plan|verification> <path>...
   state.mjs checkpoint <state-file> <planning|plan|verification> <target-stage> <path...>
-  state.mjs checkpoint-task <state-file> <task-id>
   state.mjs check <state-file> <planning|plan|verification>
   state.mjs check-initial <state-file>
   state.mjs stage <state-file> <stage-number>
@@ -603,9 +589,6 @@ function main(argv) {
       break;
     case "checkpoint":
       commandCheckpoint(statePath, args[0], args.slice(1));
-      break;
-    case "checkpoint-task":
-      commandCheckpointTask(statePath, args[0]);
       break;
     case "check":
       commandCheck(statePath, args[0]);

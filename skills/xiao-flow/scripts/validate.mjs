@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 const skillRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const requiredFiles = [
   "SKILL.md",
-  "references/orchestration-rules.md",
   "references/state-and-recovery.md",
   "references/guide.md",
   ...Array.from({ length: 6 }, (_, index) => `stages/stage-${index + 1}.md`),
@@ -32,8 +31,8 @@ const skill = contents.get("SKILL.md") ?? "";
 if (!/^name:\s*xiao-flow$/m.test(skill)) {
   errors.push("SKILL.md name must remain xiao-flow");
 }
-if (!/^\s*version:\s*["']3\.4["']$/m.test(skill)) {
-  errors.push("SKILL.md metadata.version must be 3.4");
+if (!/^\s*version:\s*["']3\.4\.1["']$/m.test(skill)) {
+  errors.push("SKILL.md metadata.version must be 3.4.1");
 }
 
 const allText = [...contents.entries()]
@@ -45,12 +44,17 @@ const forbiddenPatterns = [
   [/\/xiao-commit\b/i, "undeclared /xiao-commit dependency"],
   [/HEAD~N/i, "unsafe inferred reset range"],
   [/^\s*(?:\$\s*)?git\s+add\s+\.\s*$/im, "unscoped git add . command"],
+  [/checkpoint-task/, "removed redundant Mini checkpoint command"],
 ];
 
 for (const [pattern, label] of forbiddenPatterns) {
   if (pattern.test(allText)) {
     errors.push(`Found forbidden ${label}`);
   }
+}
+
+if (/commandCheckpointTask|checkpoint-task/.test(contents.get("scripts/state.mjs") ?? "")) {
+  errors.push("Removed Mini checkpoint command is still present in the state runtime");
 }
 
 const requiredPatterns = [

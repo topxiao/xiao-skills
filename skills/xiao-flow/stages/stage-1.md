@@ -39,7 +39,7 @@
 
 <项目类型及现有代码调查结果>
 
-<当前模式；fast 的精简规则见 references/guide.md>
+<当前模式；只有模式边界不明时才读取 references/guide.md>
 
 **OpenSpec canonical artifact：** 将验证后的设计直接写入下方 `resolvedOutputPath`，通常是 `openspec/changes/<change-name>/design.md`。遵循前置读取的 OpenSpec template、instruction 和 rules；该文件同时是 brainstorming 的书面设计与 OpenSpec canonical design。
 

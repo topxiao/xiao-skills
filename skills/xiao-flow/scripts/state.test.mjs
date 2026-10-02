@@ -327,18 +327,10 @@ test("checkpoint batches planning, plan, and verification transitions", () => {
   }
 });
 
-test("Mini checkpoint-task records completion in one command", () => {
-  const item = fixture("mini");
-  try {
-    const taskFile = "openspec/changes/demo/tasks.md";
-    mkdirSync(dirname(join(item.root, taskFile)), { recursive: true });
-    writeFileSync(join(item.root, taskFile), "- [ ] 1.1 demo\n", "utf8");
-    run(["checkpoint", item.statePath, "planning", "4", taskFile]);
-    run(["checkpoint-task", item.statePath, "1.1"]);
-    const state = readState(item.statePath);
-    assert.deepEqual(state.completedTasks, ["1.1"]);
-    assert.equal(state.currentTask, null);
-  } finally {
-    item.cleanup();
-  }
+test("help lists Mini task lifecycle without the redundant checkpoint command", () => {
+  const result = runResult(["help"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /state\.mjs task <state-file> <task-id\|NONE>/);
+  assert.match(result.stdout, /state\.mjs complete-task <state-file> <task-id>/);
+  assert.doesNotMatch(result.stdout, /checkpoint-task/);
 });
