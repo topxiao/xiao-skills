@@ -15,10 +15,10 @@
 
 ```markdown
 ---
-xiao_spec_version: 4.0.0
+xiao_spec_version: 4.1.0
 mode: standard
 phase: design # design|plan|implementation|verification|archive|completed
-status: active # active|blocked|archived|completed
+status: active # active|blocked|cancelled|completed
 base_commit: <hash|NONE|UNKNOWN>
 initial_dirty_paths: []
 approved_at: null
@@ -40,35 +40,75 @@ archive_path: null
 
 frontmatter 是人工维护的恢复记录，不是自动状态机。`phase` 和 `status` 只能使用模板列出的值；无法从正文或证据确认的字段标记为未知，不补写假状态。不要记录密码、Token、密钥、客户数据或完整日志。
 
+## 章节定义
+
+每个章节写什么，一行一个：
+
+| 章节 | 写什么 |
+|---|---|
+| Problem | 当前痛点，为什么现在做，一两句话 |
+| Goals | 成功后可观察的结果 |
+| Scope | 明确包含的文件、模块和行为 |
+| Non-goals | 明确不做、防止范围蔓延的内容 |
+| Constraints | 技术、兼容性、性能、安全等硬约束 |
+| Design | 选定方案与取舍；多方案时记录未选方案及原因 |
+| Requirements and Scenarios | 每条需求至少一个可观察场景：前置条件 / 操作 / 预期结果 |
+| Acceptance | 验收清单（普通列表，不勾选），逐条对应测试、静态检查、人工检查或用户验收动作；证据写入最终验证报告 |
+| Decisions and Open Questions | 已定决策、待定问题及其影响 |
+
+## 示例
+
+Mini 规模的填充示例（仅示意正文，frontmatter 见上方模板）：
+
+```markdown
+# 导出按钮增加 CSV 格式
+
+## Problem
+当前只能导出 JSON，运营需要 CSV 直接进表格工具。
+
+## Goals
+- 导出时可选择 CSV，数据内容与 JSON 导出一致
+
+## Scope
+- `src/export/` 的格式选择与 CSV 序列化
+- 导出相关测试
+
+## Non-goals
+- 不支持 xlsx
+- 不改导出权限逻辑
+
+## Constraints
+- 纯前端实现，不新增依赖
+
+## Design
+在现有格式枚举中新增 `csv` 分支，复用现有数据组装逻辑，仅序列化层不同。
+
+## Requirements and Scenarios
+- R1 选择 CSV 导出
+  - 前置条件：列表已有数据
+  - 操作：导出时选择 CSV
+  - 预期结果：下载 `.csv`，表头与列顺序和 JSON 字段一致
+
+## Acceptance
+- A1 `npm test -- export` 通过，覆盖 R1
+- A2 人工导出检查中文内容不乱码
+
+## Decisions and Open Questions
+- 已定：逗号分隔，UTF-8 BOM 保证中文兼容
+- 待定：无
+```
+
 ## 设计调查
 
 - 先写出对用户目标、约束和成功标准的简短理解，请用户纠正误解。
 - 方案涉及多个组件时提出 2–3 个可行方案，说明取舍并给出推荐；简单变更只保留必要方案。
-- `Scope` 写明确包含的文件/模块和行为；`Non-goals` 写明确不做的内容。
-- 每个需求至少包含一个可观察场景，使用“前置条件 / 操作 / 预期结果”描述。
-- `Acceptance` 必须能对应到测试、静态检查、人工检查或明确的用户验收动作。
+- 各章节按上方定义填写；不确定的内容放进 Decisions and Open Questions，不编造。
 
 ## 审批门
 
-汇报 change 路径、关键决策、范围、非目标和验收场景，等待用户明确批准。批准只允许进入计划阶段；设计变更必须重新展示受影响内容并重新批准。
+汇报 change 路径、关键决策、范围、非目标和验收场景，等待用户明确批准。批准只允许进入计划阶段；设计变更必须重新展示受影响内容并重新批准。获批后按 `verification-and-recovery.md` 的事件表更新阶段字段，再进入下一阶段。
 
 Mini 可以在同一轮内完成设计和一项计划，但仍必须先得到设计范围与验收标准的确认。
-
-## 阶段字段更新
-
-阶段完成后，在继续工作前更新 `change.md` frontmatter：
-
-| 事件 | `phase` | `status` |
-|---|---|---|
-| 设计获批，Standard/Fast 进入计划 | `plan` | `active` |
-| 设计获批，Mini 进入实现 | `implementation` | `active` |
-| 计划获批并开始实现 | `implementation` | `active` |
-| 所有任务完成并开始验证 | `verification` | `active` |
-| 验证证据完整并开始归档 | `archive` | `active` |
-| 归档完成 | `completed` | `completed` |
-| 当前阶段无法继续 | 保留当前阶段 | `blocked` |
-
-每次用户批准设计或计划时更新 `approved_at`。阶段字段只反映证据已经达到的阶段，不得提前填写。
 
 ## 漂移处理
 
