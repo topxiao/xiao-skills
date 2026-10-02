@@ -32,8 +32,8 @@ const skill = contents.get("SKILL.md") ?? "";
 if (!/^name:\s*xiao-flow$/m.test(skill)) {
   errors.push("SKILL.md name must remain xiao-flow");
 }
-if (!/^\s*version:\s*["']3\.2["']$/m.test(skill)) {
-  errors.push("SKILL.md metadata.version must be 3.2");
+if (!/^\s*version:\s*["']3\.4["']$/m.test(skill)) {
+  errors.push("SKILL.md metadata.version must be 3.4");
 }
 
 const allText = [...contents.entries()]
@@ -56,6 +56,7 @@ for (const [pattern, label] of forbiddenPatterns) {
 const requiredPatterns = [
   [/references\/state-and-recovery\.md/, "state/recovery reference"],
   [/scripts\/state\.mjs/, "state runtime reference"],
+  [/checkpoint/, "batched checkpoint command"],
   [/"schemaVersion": 2/, "state schema v2"],
   [/initialDirtyPaths/, "initial dirty path boundary"],
   [/initialDirtySnapshot/, "initial dirty path fingerprint"],
@@ -65,7 +66,8 @@ const requiredPatterns = [
   [/一个 OpenSpec task 可以拆成多个 Plan Task/, "one-to-many task mapping"],
   [/Mini.*1 → 2 → 4 → 5 → 6/, "Mini short path"],
   [/pendingAction/, "pending post-archive action"],
-  [/存在任一未完成 Task → Stage 4，包括零个 Task 被勾选/, "zero-checkbox Stage 4 recovery"],
+  [/Task N: complete/, "SDD ledger completion recovery"],
+  [/### Task N/, "stable SDD task heading"],
   [/不新增、删除、改写或重排 OpenSpec task 文本/, "tasks.md preservation rule"],
   [/git add -- <精确路径\.\.\.>/, "scoped staging rule"],
 ];

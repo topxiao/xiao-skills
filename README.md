@@ -61,6 +61,18 @@ Stage 6: 归档 (openspec-archive-change)
 
 状态由 `scripts/state.mjs` 原子更新；planning、plan、verification 三类快照会在恢复和阶段切换时检测工件漂移。
 
+每个 change 的过程与规范文件统一放在 `openspec/changes/<change-name>/`：
+
+```text
+design.md                 # brainstorming 书面设计与 OpenSpec canonical 设计（同一份文件）
+proposal.md               # OpenSpec 规范源
+specs/                    # OpenSpec 规范源
+tasks.md                  # OpenSpec 规范任务源
+implementation-plan.md    # Standard/Fast 执行计划；Mini 不生成
+```
+
+Stage 1 先 scaffold change 并按 OpenSpec design instructions 写入 `design.md`；Stage 2 保留该已批准工件并补齐 proposal、specs、tasks。Stage 2 后以 OpenSpec 标准工件为需求和验收依据，执行计划负责文件级步骤与 TDD 进度。
+
 ### 维护验证
 
 ```bash

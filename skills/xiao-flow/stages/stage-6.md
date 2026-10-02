@@ -45,16 +45,11 @@ node <skill-root>/scripts/state.mjs archive <state-file> <archivePath> <archive-
 - 选择只归档：随后运行 `state.mjs complete <state-file>`，状态进入 `completed`。
 - 选择归档 + commit：状态保持 `archived` 且 `pendingAction: commit`，commit 成功前不得标记 completed。
 
-## Step 2.5: 收纳中间产物
+## Step 2.5: 归档边界
 
-将中间文档移入归档目录，使每个 change 的全部记录集中在 `<archivePath>/`：
+`openspec-archive-change` 将整个 change 目录移动到 archive，canonical `design.md` 与 `implementation-plan.md` 会随目录原样保留。不要在 OpenSpec 归档之外另行移动、重命名或删除它们。
 
-1. `designPath` 对应的文件存在 → 移动到 `<archivePath>/design-input.md`，删除原文件。
-2. `planPath` 对应的文件存在（Standard/Fast）→ 移动到 `<archivePath>/plan.md`，删除原文件。
-3. 移动后若原目录（如 `docs/superpowers/specs/`、`docs/superpowers/plans/`）变空，一并删除空目录。
-4. `.superpowers/` 目录存在 → 整个删除。该目录是 SDD skill 的运行时工作区（brief、report、review diff、progress），不属于项目产物。
-
-后续 commit 的精确路径应包含归档目录中的新文件和原路径的删除。
+`.superpowers/` 是 SDD 的 gitignored 运行时目录；不要自动删除。若需要清理它，先列出精确路径并取得用户确认。
 
 ## Step 3: Commit（仅当用户选方案 1）
 

@@ -15,11 +15,11 @@
 计划文件: <状态文件中的 planPath>
 
 渐进式执行流程：
-1. 选择第一个未完成且依赖已满足的 Task，通过 state.mjs task 写入 currentTask。
+1. 运行 SDD 的 `sdd-workspace <planPath>`，读取该 plan 专属的 `.superpowers/sdd/.../progress.md` ledger。ledger 中 `Task <N>: complete` 是 Standard/Fast 唯一的任务完成记录；恢复时从第一个没有 complete 记录的 Task 继续。
 2. 读取该 Task、依赖 Task 摘要、关联的单个 OpenSpec task/spec，以及列出的现有源码和测试。
 3. 按 TDD 执行：新增失败测试 → 确认失败原因正确 → 最小实现 → 针对性测试通过。
-4. 完成需求符合性审查和代码质量审查；两者都通过后，才把标题从 `### Task N` 改为 `### [x] Task N`。
-5. 更新 currentTask，继续下一个可执行 Task。
+4. 完成需求符合性审查和代码质量审查后，由 SDD 在 ledger 追加 `Task <N>: complete`。
+5. 不修改 `implementation-plan.md` 的 Task 标题或步骤 checkbox；继续下一个没有 ledger complete 记录的 Task。
 6. 全部完成后运行计划定义的整体测试并做全量代码审查。
 
 不得 commit、stash、reset 或清理 worktree。实现子代理收到相同约束。
@@ -44,7 +44,7 @@ Mini 不调用 `superpowers:subagent-driven-development`，也不存在独立 Pl
 
 ## 完成
 
-- Standard/Fast：确认 Plan 中没有未完成 Task，且每个 `[x]` Task 都有本轮测试和审查证据。
+- Standard/Fast：确认 Plan 的每个 `### Task N` 在对应 SDD ledger 中都有 `Task N: complete` 记录，且 ledger 中保留本轮测试、审查和裁决证据。
 - Mini：确认唯一 OpenSpec task ID 已存在于 `completedTasks`。
 
-清空 `currentTask` 后运行 `state.mjs stage ... 5`，汇报完成状态和整体测试结果。Standard 等待用户确认；Fast/Mini 直接进入 Stage 5。
+Standard/Fast 直接运行 `state.mjs stage ... 5`；Mini 清空 `currentTask` 后运行同一命令。汇报完成状态和整体测试结果。Standard 等待用户确认；Fast/Mini 直接进入 Stage 5。

@@ -39,11 +39,11 @@
     },
     {
       "id": 4,
-      "prompt": "/xiao-flow 继续 billing-fix。Stage 4 的 Task 2 做到一半，工作树有实现修改；启动前另有用户自己的 notes.md 修改。",
-      "expected_output": "保留当前工作树和用户既有修改，从 currentTask 恢复；不得自动 stash、reset、删除 worktree 或暂存 notes.md。",
+      "prompt": "/xiao-flow 继续 billing-fix。Standard 模式的 Stage 4 Task 2 做到一半，SDD ledger 记录 Task 1 complete、Task 2 没有 complete；工作树有实现修改，启动前另有用户自己的 notes.md 修改。",
+      "expected_output": "保留当前工作树和用户既有修改，按 SDD ledger 从 Task 2 恢复；不得自动 stash、reset、删除 worktree 或暂存 notes.md。",
       "files": [],
       "expectations": [
-        "读取 currentTask 并检查当前 diff",
+        "读取当前 plan 对应的 SDD ledger 并从 Task 2 恢复",
         "保留任务内未完成代码继续执行",
         "不 stash、reset 或清理 worktree",
         "把 notes.md 识别为 initialDirtyPaths 并排除在工作流提交范围外"
@@ -150,14 +150,14 @@
     },
     {
       "id": 13,
-      "prompt": "/xiao-flow 继续 search-cache。Stage 4 正常把 Plan 标题从 ### Task 1 改成 ### [x] Task 1，同时 Stage 5 把 tasks.md 的 checkbox 勾选；其他文字没有变化。",
-      "expected_output": "plan 和 planning 快照仍通过，因为只忽略受控的进度标记；如果任务文本、路径或验收条件变化则必须报告漂移。",
+      "prompt": "/xiao-flow 继续 search-cache。SDD ledger 已记录 Task 1: complete；有人把 Plan 标题从 ### Task 1 改成 ### [x] Task 1，同时 Stage 5 需要同步 tasks.md。",
+      "expected_output": "Plan 标题改写触发 plan 漂移并回 Stage 3；恢复 Plan 标题后，Stage 5 仅依据 SDD ledger 和 OpenSpec Task 映射勾选 tasks.md，不能依赖 Plan checkbox。",
       "files": [],
       "expectations": [
-        "Plan Task checkbox 变化不触发 plan 漂移",
+        "Plan Task 标题必须保持 ### Task N，改写为 [x] 会触发 plan 漂移",
         "OpenSpec tasks checkbox 变化不触发 planning 漂移",
-        "任务文本或需求变化仍会触发漂移",
-        "不会通过忽略整个文件来规避检测"
+        "SDD ledger 是 Standard/Fast 的唯一执行完成记录",
+        "不会通过修改 Plan checkbox 来规避 ledger 证据"
       ]
     }
   ]

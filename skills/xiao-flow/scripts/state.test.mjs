@@ -18,7 +18,7 @@ const scriptPath = fileURLToPath(new URL("./state.mjs", import.meta.url));
 function fixture(mode = "standard") {
   const root = mkdtempSync(join(tmpdir(), "xiao-flow-state-"));
   const statePath = join(root, ".xiao-flow", "demo.json");
-  const designPath = "docs/superpowers/specs/demo-design.md";
+  const designPath = "openspec/changes/demo/design.md";
   mkdirSync(dirname(join(root, designPath)), { recursive: true });
   writeFileSync(join(root, designPath), "# Design\n", "utf8");
   run([
@@ -86,11 +86,11 @@ test("planning drift is detected", () => {
   }
 });
 
-test("plan progress checkboxes do not invalidate the plan snapshot", () => {
+test("plan task heading changes invalidate the plan snapshot", () => {
   const item = fixture();
   try {
     const proposal = "openspec/changes/demo/proposal.md";
-    const plan = "docs/superpowers/plans/demo.md";
+    const plan = "openspec/changes/demo/implementation-plan.md";
     mkdirSync(dirname(join(item.root, proposal)), { recursive: true });
     mkdirSync(dirname(join(item.root, plan)), { recursive: true });
     writeFileSync(join(item.root, proposal), "proposal\n", "utf8");
@@ -101,7 +101,7 @@ test("plan progress checkboxes do not invalidate the plan snapshot", () => {
     run(["snapshot", item.statePath, "plan", plan]);
     run(["stage", item.statePath, "4"]);
     writeFileSync(join(item.root, plan), "### [x] Task 1: Demo\n", "utf8");
-    assert.equal(runResult(["check", item.statePath, "plan"]).status, 0);
+    assert.equal(runResult(["check", item.statePath, "plan"]).status, 2);
   } finally {
     item.cleanup();
   }
@@ -258,7 +258,7 @@ test("rolling back invalidates downstream evidence", () => {
   const item = fixture();
   try {
     const proposal = "openspec/changes/demo/proposal.md";
-    const plan = "docs/superpowers/plans/demo.md";
+    const plan = "openspec/changes/demo/implementation-plan.md";
     mkdirSync(dirname(join(item.root, proposal)), { recursive: true });
     mkdirSync(dirname(join(item.root, plan)), { recursive: true });
     writeFileSync(join(item.root, proposal), "proposal\n", "utf8");
@@ -296,12 +296,49 @@ test("compatibility recovery can initialize directly at a validated stage", () =
       "--stage",
       "4",
       "--plan",
-      "docs/superpowers/plans/demo.md",
+      "openspec/changes/demo/implementation-plan.md",
     ]);
     const state = readState(statePath);
     assert.equal(state.nextStage, 4);
-    assert.equal(state.planPath, "docs/superpowers/plans/demo.md");
+    assert.equal(state.planPath, "openspec/changes/demo/implementation-plan.md");
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("checkpoint batches planning, plan, and verification transitions", () => {
+  const item = fixture();
+  try {
+    const proposal = "openspec/changes/demo/proposal.md";
+    const plan = "openspec/changes/demo/implementation-plan.md";
+    mkdirSync(dirname(join(item.root, proposal)), { recursive: true });
+    mkdirSync(dirname(join(item.root, plan)), { recursive: true });
+    writeFileSync(join(item.root, proposal), "proposal\n", "utf8");
+    writeFileSync(join(item.root, plan), "### Task 1: Demo\n", "utf8");
+    run(["checkpoint", item.statePath, "planning", "3", proposal]);
+    run(["checkpoint", item.statePath, "plan", "4", plan]);
+    run(["stage", item.statePath, "5"]);
+    run(["checkpoint", item.statePath, "verification", "6", proposal, plan]);
+    const state = readState(item.statePath);
+    assert.equal(state.nextStage, 6);
+    assert.ok(state.verifiedAt);
+  } finally {
+    item.cleanup();
+  }
+});
+
+test("Mini checkpoint-task records completion in one command", () => {
+  const item = fixture("mini");
+  try {
+    const taskFile = "openspec/changes/demo/tasks.md";
+    mkdirSync(dirname(join(item.root, taskFile)), { recursive: true });
+    writeFileSync(join(item.root, taskFile), "- [ ] 1.1 demo\n", "utf8");
+    run(["checkpoint", item.statePath, "planning", "4", taskFile]);
+    run(["checkpoint-task", item.statePath, "1.1"]);
+    const state = readState(item.statePath);
+    assert.deepEqual(state.completedTasks, ["1.1"]);
+    assert.equal(state.currentTask, null);
+  } finally {
+    item.cleanup();
   }
 });

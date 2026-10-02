@@ -2,17 +2,19 @@
 
 ## OpenSpec task 同步
 
-先检查快照（Standard/Fast 检查 planning + plan；Mini 检查 planning）。漂移时先回退，不同步 checkbox。Standard/Fast 按 Plan Task 的 **OpenSpec Task** 字段映射：关联 Plan Task 全部为 `[x]` 时才勾选原 checkbox。Mini 按 `completedTasks` 同步唯一 task。不新增、删除、改写或重排 OpenSpec task 文本。
+先检查快照（Standard/Fast 检查 planning + plan；Mini 检查 planning）。漂移时先回退，不同步 checkbox。Standard/Fast 先解析 `planPath` 的 `### Task N` 和 **OpenSpec Task** 映射，再读取同一 plan 的 SDD ledger；只有 ledger 中存在 `Task N: complete` 的 Plan Task 才算完成。一个 OpenSpec task 关联的全部 Plan Task 都完成时，才勾选 tasks.md 的原 checkbox。Mini 按 `completedTasks` 同步唯一 task。不新增、删除、改写或重排 OpenSpec task 文本。
 
-映射不完整或存在未知 task ID 时回 Stage 3；存在未完成实现任务时回 Stage 4。
+Standard/Fast 的 ledger 必须声明与当前 `planPath` 相同的 plan 身份；缺少 ledger、身份不符、映射不完整或存在未知 task ID 时回 Stage 4 或 Stage 3。存在没有 complete 记录的实现任务时回 Stage 4。
 
 ## 验证
 
 ```
 使用 superpowers:verification-before-completion 验证以下声明：
 
+Standard/Fast 的执行计划读取状态文件中的 `planPath`（固定为 `openspec/changes/<change-name>/implementation-plan.md`）；Mini 没有独立执行计划。这个显式路径覆盖该 Skill 的默认计划目录。
+
 验证项：
-1. 执行进度与 tasks.md 完成 — Standard/Fast 的 Plan Task、Mini 的 completedTasks 与 OpenSpec checkbox 一致。
+1. 执行进度与 tasks.md 完成 — Standard/Fast 的 SDD ledger、Plan 映射与 OpenSpec checkbox 一致；Mini 的 completedTasks 与 OpenSpec checkbox 一致。
 2. specs 场景满足 — 逐 capability 对每个验收场景给出实现或测试证据。
 3. proposal/design 一致 — 实现没有遗漏目标、违反设计决策或扩大范围。
 4. 自动化验证通过 — 运行项目规则、Plan 和仓库配置要求的测试、lint、typecheck、build；不存在的检查说明原因。
@@ -33,6 +35,6 @@
 - 规范工件错误或范围变化 → Stage 2；Standard/Fast 随后进入 Stage 3，Mini 重新判断短路径资格。
 - Plan 映射不完整 → Stage 3；Mini 不满足单 task 边界时升级模式。
 - 实现或测试失败 → Stage 4。
-- 全部通过 → 从 scoped diff、实现文件清单和 OpenSpec 工件构造当前 change 的精确路径集合。排除状态 JSON，包含代码、测试、配置、OpenSpec 工件以及 Standard/Fast 的 Plan；使用 `state.mjs snapshot ... verification` 保存快照，再调用 `state.mjs verified` 和 `state.mjs stage ... 6`。
+- 全部通过 → 从 scoped diff、实现文件清单和 OpenSpec 工件构造当前 change 的精确路径集合。排除状态 JSON，包含代码、测试、配置、OpenSpec 工件和 Standard/Fast 的 `implementation-plan.md`；使用 `state.mjs checkpoint <state> verification 6 <change-owned-path...>` 一次保存快照、写入 verifiedAt 并进入 Stage 6。
 
 验证通过后任一 verification 路径再次变化时，`state.mjs check` 会失败；使用 `state.mjs stage ... 5` 自动失效验证证据并重新执行 Stage 5。

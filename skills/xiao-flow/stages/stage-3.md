@@ -29,8 +29,10 @@
 4. 写明依赖、验证命令和预期结果；仅在接口或关键逻辑不明显时放核心代码片段。
 5. 全部完成后检查范围、顺序和映射一致性。
 
-保存到: docs/superpowers/plans/YYYY-MM-DD-<change-name>.md
+**用户指定的文档位置覆盖：** 保存到:
+openspec/changes/<change-name>/implementation-plan.md
 将实际路径保存到状态文件的 planPath，后续恢复始终复用该路径。
+该明确路径覆盖 writing-plans 的默认 `docs/superpowers/plans/`。调用时传入此路径；完成汇报也以实际 `planPath` 为准，不按 Skill 默认提示推导路径。
 
 约束：
 - 不允许 TODO/TBD/占位符或未经调查的路径
@@ -56,9 +58,11 @@
 - Test: `<path>`
 ```
 
+Task 标题必须始终保持 `### Task N: ...`。不要把标题改为 `[x]`；SDD 的 `task-brief` 只按该标题抽取任务。writing-plans 生成的步骤 checkbox 保留为任务内说明，不作为 xiao-flow 的恢复或完成状态。
+
 ## 产出
 
-- 实施计划：`docs/superpowers/plans/YYYY-MM-DD-<change-name>.md`
+- 实施计划：`openspec/changes/<change-name>/implementation-plan.md`
 
 ## 完成
 
@@ -70,6 +74,6 @@
 - 没有 TODO/TBD、重复 Task 或未经调查的文件路径
 - 测试、实现和验证步骤可执行
 
-通过后运行 `state.mjs plan` 写入 `planPath`，再为 Plan 生成 `plan` 快照；脚本会忽略后续正常的 `[x]` 进度标记，但会检测步骤、路径和映射变化。最后运行 `state.mjs stage ... 4`。
+通过后运行 `state.mjs checkpoint <state> plan 4 <planPath>`，一次写入 `planPath`、生成 `plan` 快照并进入 Stage 4。Plan 在执行期间保持稳定；Task 标题、步骤、路径或映射变化都会触发漂移，需回 Stage 3 复核。
 
 汇报计划路径、Plan Task 数和 OpenSpec task 覆盖数；用户确认后进入 Stage 4。Fast 的这次确认同时授权连续执行 Stage 4–5。

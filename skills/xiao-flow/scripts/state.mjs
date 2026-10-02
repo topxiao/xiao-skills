@@ -147,12 +147,9 @@ function createSnapshot(state, slot, paths) {
   const files = {};
   for (const inputPath of [...new Set(paths)].sort()) {
     const normalizedInput = projectPath(state, inputPath).relative;
-    const planPath = state.planPath?.replaceAll("\\", "/");
     const normalization =
-      slot === "plan" && normalizedInput === planPath
-        ? "plan-progress"
-        : slot === "planning" && normalizedInput.endsWith("/tasks.md")
-          ? "task-progress"
+      slot === "planning" && normalizedInput.endsWith("/tasks.md")
+        ? "task-progress"
         : "raw";
     const item = fingerprint(state, inputPath, normalization);
     files[item.path] = {
@@ -350,8 +347,7 @@ function commandCheckInitial(statePath) {
   if (drift.length > 0) process.exit(2);
 }
 
-function commandStage(statePath, rawTarget) {
-  const state = readState(statePath);
+function transitionState(state, rawTarget) {
   if (state.status !== "active") fail(`Cannot transition ${state.status} state`);
   const target = Number(rawTarget);
   const sequence = stageSequence(state.mode);
@@ -369,7 +365,7 @@ function commandStage(statePath, rawTarget) {
       if (!state.planPath) fail("planPath is required before Stage 4");
       requireCurrentSnapshot(state, "plan");
     }
-    if (target >= 5 && state.currentTask !== null) {
+    if (target >= 5 && state.mode === "mini" && state.currentTask !== null) {
       fail("currentTask must be clear before Stage 5");
     }
     if (target === 6) {
@@ -380,8 +376,55 @@ function commandStage(statePath, rawTarget) {
     invalidateForStage(state, target);
   }
   state.nextStage = target;
+}
+
+function commandStage(statePath, rawTarget) {
+  const state = readState(statePath);
+  transitionState(state, rawTarget);
   writeStateAtomic(statePath, state);
-  console.log(`Transitioned to Stage ${target}`);
+  console.log(`Transitioned to Stage ${state.nextStage}`);
+}
+
+function commandCheckpoint(statePath, slot, args) {
+  const state = readState(statePath);
+  if (state.status !== "active") fail("Checkpoints may only update active state");
+  const target = args[0];
+  if (!target) fail("checkpoint requires a target stage");
+
+  if (slot === "planning") {
+    state.snapshots.planning = createSnapshot(state, slot, args.slice(1));
+  } else if (slot === "plan") {
+    const planPath = args[1];
+    if (!planPath || args.length !== 2) {
+      fail("plan checkpoint requires exactly one plan path");
+    }
+    state.planPath = planPath.replaceAll("\\", "/");
+    state.snapshots.plan = createSnapshot(state, slot, [planPath]);
+    state.snapshots.verification = null;
+    state.verifiedAt = null;
+  } else if (slot === "verification") {
+    state.snapshots.verification = createSnapshot(state, slot, args.slice(1));
+    state.verifiedAt = now();
+  } else {
+    fail(`Unknown checkpoint slot: ${slot}`);
+  }
+
+  transitionState(state, target);
+  writeStateAtomic(statePath, state);
+  console.log(`Checkpointed ${slot}; transitioned to Stage ${state.nextStage}`);
+}
+
+function commandCheckpointTask(statePath, taskId) {
+  const state = readState(statePath);
+  if (state.status !== "active" || state.mode !== "mini" || state.nextStage !== 4) {
+    fail("checkpoint-task is only valid for Mini Stage 4");
+  }
+  if (!taskId) fail("checkpoint-task requires a task ID");
+  state.currentTask = taskId;
+  if (!state.completedTasks.includes(taskId)) state.completedTasks.push(taskId);
+  state.currentTask = null;
+  writeStateAtomic(statePath, state);
+  console.log(`Completed Mini task ${taskId}`);
 }
 
 function commandPlan(statePath, planPath) {
@@ -399,8 +442,8 @@ function commandPlan(statePath, planPath) {
 
 function commandTask(statePath, taskId) {
   const state = readState(statePath);
-  if (state.status !== "active" || state.nextStage !== 4) {
-    fail("currentTask may only change during Stage 4");
+  if (state.status !== "active" || state.mode !== "mini" || state.nextStage !== 4) {
+    fail("currentTask may only change during Mini Stage 4");
   }
   state.currentTask = taskId === "NONE" ? null : taskId;
   writeStateAtomic(statePath, state);
@@ -409,8 +452,8 @@ function commandTask(statePath, taskId) {
 
 function commandCompleteTask(statePath, taskId) {
   const state = readState(statePath);
-  if (state.status !== "active" || state.nextStage !== 4) {
-    fail("Tasks may only complete during Stage 4");
+  if (state.status !== "active" || state.mode !== "mini" || state.nextStage !== 4) {
+    fail("Tasks may only complete during Mini Stage 4");
   }
   if (!state.completedTasks.includes(taskId)) state.completedTasks.push(taskId);
   if (state.currentTask === taskId) state.currentTask = null;
@@ -529,6 +572,8 @@ function usage() {
   console.log(`Usage:
   state.mjs init <state-file> --change <name> --mode <mode> --base <sha|UNBORN|NULL> [--root <path>] [--stage <number>] [--design <path|NONE>] [--plan <path|NONE>] [--dirty <path>]... [--dirty-unknown true]
   state.mjs snapshot <state-file> <planning|plan|verification> <path>...
+  state.mjs checkpoint <state-file> <planning|plan|verification> <target-stage> <path...>
+  state.mjs checkpoint-task <state-file> <task-id>
   state.mjs check <state-file> <planning|plan|verification>
   state.mjs check-initial <state-file>
   state.mjs stage <state-file> <stage-number>
@@ -555,6 +600,12 @@ function main(argv) {
       break;
     case "snapshot":
       commandSnapshot(statePath, args[0], args.slice(1));
+      break;
+    case "checkpoint":
+      commandCheckpoint(statePath, args[0], args.slice(1));
+      break;
+    case "checkpoint-task":
+      commandCheckpointTask(statePath, args[0]);
       break;
     case "check":
       commandCheck(statePath, args[0]);

@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires Node.js, Git, OpenSpec CLI, and the mode-specific OpenSpec/Superpowers skills listed below
 metadata:
   author: "XIAO"
-  version: "3.2"
+  version: "3.4"
   generatedBy: "xiao-flow"
 ---
 
@@ -22,7 +22,7 @@ metadata:
 - 每个 Stage 达成退出条件后才更新状态，再按当前模式决定是否等待用户确认。
 - 被调用 Skill 完成后必须返回 XIAOFlow，不得自行跳转到下一阶段或触发 commit。XIAOFlow 负责提供完整输入、检查退出条件并决定下一阶段。
 - 不并行分派实现任务；并行只允许用于互不修改文件的只读调查或调试取证。
-- `superpowers:subagent-driven-development` 的进度只更新 Plan Task 和 `currentTask`，不直接更新 `tasks.md`；每个 Task 通过针对性测试和两阶段审查后才标记 `[x]`。
+- `superpowers:subagent-driven-development` 的 Standard/Fast 进度只记录在 plan 专属 SDD ledger，不修改 Plan Task、Plan 步骤或 `currentTask`；Mini 才使用 `currentTask`。Stage 5 依据 ledger 将完成状态单向投影到 `tasks.md`。
 - `superpowers:verification-before-completion` 只接受本次运行的新鲜命令输出，不用推断或历史结果代替。
 
 ## 前置检查
@@ -47,7 +47,7 @@ metadata:
 
 ## 状态与恢复
 
-用户确认 change-name 后，通过 `node <skill-root>/scripts/state.mjs init ...` 在 `.xiao-flow/<change-name>.json` 创建状态文件。目录只保存每个 change 的本地编排状态，文件名必须与 change-name 完全一致；init 时自动追加 `.gitignore`（覆盖 `.xiao-flow/` 和 `.superpowers/`），不保存密钥、文件内容或完整日志。
+用户确认 change-name 后，Stage 1 先创建 OpenSpec scaffold，再通过 `node <skill-root>/scripts/state.mjs init ... --stage 1 --design <resolvedOutputPath>` 在 `.xiao-flow/<change-name>.json` 创建状态文件。目录只保存每个 change 的本地编排状态，文件名必须与 change-name 完全一致；init 时自动追加 `.gitignore`（覆盖 `.xiao-flow/` 和 `.superpowers/`），不保存密钥、文件内容或完整日志。
 
 `superpowers:subagent-driven-development` 在 Stage 4 执行期间会在 `.superpowers/sdd/` 下生成 brief、report、review diff 和 progress 等工作文件。该目录是运行时临时产物，不应纳入版本控制；Stage 6 归档完成后应清理。
 
@@ -59,9 +59,9 @@ metadata:
 
 | 阶段 | 文件 | Standard / Fast | Mini | 核心退出条件 |
 |------|------|-----------------|------|-------------|
-| Stage 1 | `stages/stage-1.md` | `superpowers:brainstorming` | 内联边界调查 | 设计输入和 change-name 已确认 |
+| Stage 1 | `stages/stage-1.md` | `superpowers:brainstorming` | 内联边界调查 | 已 scaffold change，OpenSpec canonical `design.md` 已由用户确认 |
 | Stage 2 | `stages/stage-2.md` | `openspec-propose` | `openspec-propose` | OpenSpec 工件完整且通过粒度审查 |
-| Stage 3 | `stages/stage-3.md` | `superpowers:writing-plans` | 跳过 | OpenSpec task 均映射到有效 Plan |
+| Stage 3 | `stages/stage-3.md` | `superpowers:writing-plans` | 跳过 | OpenSpec task 均映射到 `implementation-plan.md` |
 | Stage 4 | `stages/stage-4.md` | `superpowers:subagent-driven-development` | 单任务 inline TDD | 实现任务全部通过测试和审查 |
 | Stage 5 | `stages/stage-5.md` | `superpowers:verification-before-completion` | 同左 | 规范、测试、静态检查和 Git 边界均有新鲜证据 |
 | Stage 6 | `stages/stage-6.md` | `openspec-archive-change` | 同左 | change 已归档，按用户选择决定是否 commit |
@@ -70,6 +70,6 @@ metadata:
 
 - 状态字段和恢复优先级：`references/state-and-recovery.md`
 - 模式、异常处理和示例：`references/guide.md`
-- 状态命令：`node <skill-root>/scripts/state.mjs help`
+- 状态命令：`node <skill-root>/scripts/state.mjs help`；阶段边界优先使用 `checkpoint` 批量命令
 - 维护验证：`node scripts/validate.mjs` 和 `node --test scripts/state.test.mjs`
 - `scripts/` 下的文件是 CLI 工具，通过 `node` 命令执行，不要读取源码来理解其行为。
