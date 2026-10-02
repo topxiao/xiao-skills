@@ -7,6 +7,7 @@ XIAO 团队的 Claude Code Skills 合集。
 | Skill | 说明 |
 |-------|------|
 | [xiao-flow](skills/xiao-flow/) | 分阶段开发工作流，编排 OpenSpec + Superpowers，支持状态恢复、Mini 短路径、漂移检测和范围化提交。 |
+| [xiao-spec](skills/xiao-spec/) | 4.x 纯提示词规格驱动开发工作流，不要求 OpenSpec、Superpowers、Node.js 或自带脚本。 |
 
 ## 安装
 
@@ -19,6 +20,9 @@ npx skills add topxiao/xiao-skills --global
 
 # 仅安装 xiao-flow
 npx skills add topxiao/xiao-skills@xiao-flow
+
+# 仅安装 xiao-spec 4.x
+npx skills add topxiao/xiao-skills@xiao-spec
 ```
 
 手动安装：
@@ -26,6 +30,8 @@ npx skills add topxiao/xiao-skills@xiao-flow
 ```bash
 git clone https://github.com/topxiao/xiao-skills.git
 cp -r xiao-skills/skills/xiao-flow ~/.claude/skills/
+# 安装纯提示词版 xiao-spec 4.x
+cp -r xiao-skills/skills/xiao-spec ~/.claude/skills/
 ```
 
 ## xiao-flow 工作流
@@ -78,6 +84,32 @@ Stage 1 先 scaffold change 并按 OpenSpec design instructions 写入 `design.m
 ```bash
 node skills/xiao-flow/scripts/validate.mjs
 ```
+
+## xiao-spec 4.x
+
+xiao-spec 是独立的纯提示词规格驱动开发工作流，不要求 OpenSpec、Superpowers、Node.js、Git、子代理或自带脚本。
+
+```text
+/xiao-spec <需求描述>
+/xiao-spec 继续 <change-name>
+```
+
+阶段路径：
+
+```text
+Standard/Fast：设计 → 计划 → 实现 → 验证 → 归档 → 完成
+Mini：         设计 → 实现 → 验证 → 归档 → 完成
+```
+
+每个 change 默认使用两份文档：
+
+```text
+docs/changes/<change-name>/
+  change.md                 # 需求、设计、范围、验收和阶段状态
+  implementation-plan.md    # 唯一任务定义与完成状态
+```
+
+Git 可用时用于提供更强的范围证据；不可用时仍可执行，但必须说明可信度限制。xiao-spec 不内置评估数据或可执行状态脚本。
 
 ## License
 
