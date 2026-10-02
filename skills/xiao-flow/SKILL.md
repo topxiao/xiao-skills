@@ -1,15 +1,15 @@
 ---
 name: xiao-flow
-description: "分阶段开发工作流编排器，协调 OpenSpec 与 Superpowers 完成需求到归档的全流程。用户显式调用 /xiao-flow 或要求按 XIAO 流程开发时激活。"
+description: "分阶段开发工作流编排器，协调 OpenSpec 与 Superpowers 完成需求到归档的全流程。用户显式调用 /xiao-flow 或要求按 Xiao 流程开发时激活。"
 license: MIT
 compatibility: Requires Node.js, Git, OpenSpec CLI, and the mode-specific OpenSpec/Superpowers skills listed below
 metadata:
-  author: "XIAO"
+  author: "Xiao"
   version: "3.4.1"
   generatedBy: "xiao-flow"
 ---
 
-**XIAOFlow** 是 OpenSpec + Superpowers 的阶段编排器。它负责阶段边界、恢复、漂移检测和安全约束，不重新实现被调用 Skill 的专业逻辑。
+**XiaoFlow** 是 OpenSpec + Superpowers 的阶段编排器。它负责阶段边界、恢复、漂移检测和安全约束，不重新实现被调用 Skill 的专业逻辑。
 
 > 全局原则中的编排约束优先于被调用 Skill 的默认阶段跳转。仅在恢复、状态冲突或漂移时读取 `references/state-and-recovery.md`；正常新 change 按当前 Stage 文件执行。
 
@@ -20,7 +20,7 @@ metadata:
 - Stage 6 之前不 commit，包括实现子代理。不要自动 stash、reset、删除 worktree，或覆盖用户修改过的计划。
 - 只处理当前 change 的文件。启动前已存在的未提交修改属于用户，默认不纳入提交。
 - 每个 Stage 达成退出条件后才更新状态，再按当前模式决定是否等待用户确认。
-- 被调用 Skill 完成后必须返回 XIAOFlow，不得自行跳转到下一阶段或触发 commit。XIAOFlow 负责提供完整输入、检查退出条件并决定下一阶段。
+- 被调用 Skill 完成后必须返回 XiaoFlow，不得自行跳转到下一阶段或触发 commit。XiaoFlow 负责提供完整输入、检查退出条件并决定下一阶段。
 - 不并行分派实现任务；并行只允许用于互不修改文件的只读调查或调试取证。
 - `superpowers:subagent-driven-development` 的 Standard/Fast 进度只记录在 plan 专属 SDD ledger，不修改 Plan Task、Plan 步骤或 `currentTask`；Mini 才使用 `currentTask`。Stage 5 依据 ledger 将完成状态单向投影到 `tasks.md`。
 - `superpowers:verification-before-completion` 只接受本次运行的新鲜命令输出，不用推断或历史结果代替。

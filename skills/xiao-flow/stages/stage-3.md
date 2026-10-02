@@ -38,7 +38,7 @@ openspec/changes/<change-name>/implementation-plan.md
 - 不允许 TODO/TBD/占位符或未经调查的路径
 - Plan 覆盖 specs/ 下所有 capability 的需求，不自创或遗漏
 - 已存在 Plan 时先判断完整度并从缺失 capability 继续；未经用户确认不得覆盖完整 Plan 或用户编辑内容
-- 完成后返回 XIAOFlow，不直接开始实现，不 commit
+- 完成后返回 XiaoFlow，不直接开始实现，不 commit
 ```
 
 ## Plan 格式要求

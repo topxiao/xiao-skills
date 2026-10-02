@@ -1,4 +1,4 @@
-# XIAOFlow 参考指南
+# XiaoFlow 参考指南
 
 > 仅在初选模式的边界不明、Stage 2 触发升级或出现跨阶段异常时加载。普通路径按 SKILL.md 的简短模式路由执行；恢复时沿用状态中的模式，除非用户明确要求更改。
 
@@ -12,7 +12,7 @@
 | Fast | 2–3 个低风险 OpenSpec task、单一模块 | 1 → 2 → 3 → 4 → 5 → 6 | 精简 Plan + SDD，减少确认轮次 |
 | Mini | 1 个低风险、可独立验证的 OpenSpec task | 1 → 2 → 4 → 5 → 6 | 无独立 Plan，inline TDD |
 
-所有模式在 Stage 1 开始时先确认 change-name、创建 OpenSpec scaffold，并从 schema 读取 canonical design 模板。Standard 在 Stage 1、2、3、4 分别汇报并等待确认。Fast 获 Stage 1 设计确认后连续执行 Stage 2–3，获 Stage 3 确认后连续执行 Stage 4–5。Mini 不调用 brainstorming，Stage 1 由 XIAOFlow 按 canonical design 模板内联调查并写精简设计（问题、范围、非目标、预计文件和验证方式），Stage 2 后直接进入 Stage 4 inline TDD。
+所有模式在 Stage 1 开始时先确认 change-name、创建 OpenSpec scaffold，并从 schema 读取 canonical design 模板。Standard 在 Stage 1、2、3、4 分别汇报并等待确认。Fast 获 Stage 1 设计确认后连续执行 Stage 2–3，获 Stage 3 确认后连续执行 Stage 4–5。Mini 不调用 brainstorming，Stage 1 由 XiaoFlow 按 canonical design 模板内联调查并写精简设计（问题、范围、非目标、预计文件和验证方式），Stage 2 后直接进入 Stage 4 inline TDD。
 
 ### 升级规则
 

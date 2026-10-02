@@ -76,7 +76,7 @@ commit 失败时保留 `archived + pendingAction: commit`，只修复并重试 s
 ## 完成输出
 
 ```
-XIAOFlow 完成。
+XiaoFlow 完成。
 - Change: <change-name>
 - 归档: <archivePath>
 - Commit: <commit hash>（或：未 commit）

@@ -24,7 +24,7 @@
 ## 模式路由
 
 - `standard` / `fast`：按下方上下文调用 `superpowers:brainstorming`。
-- `mini`：不调用 brainstorming Skill。由 XIAOFlow 完成同样的代码调查，按 OpenSpec design artifact 的模板写入同一个 canonical design 文件，只包含问题、范围、非目标、预计文件和验证方式；不得讨论多个架构方案。
+- `mini`：不调用 brainstorming Skill。由 XiaoFlow 完成同样的代码调查，按 OpenSpec design artifact 的模板写入同一个 canonical design 文件，只包含问题、范围、非目标、预计文件和验证方式；不得讨论多个架构方案。
 
 ## 调用上下文
 
@@ -45,7 +45,7 @@
 
 不要另建 `design-input.md`，也不要写到 Superpowers 默认的 `docs/superpowers/specs/`。
 
-输出并审阅 canonical design 后返回 XIAOFlow，不进入 writing-plans，不 commit。
+输出并审阅 canonical design 后返回 XiaoFlow，不进入 writing-plans，不 commit。
 ```
 
 ## 产出

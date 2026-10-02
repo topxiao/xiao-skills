@@ -239,7 +239,7 @@ test("commit mode remains archived until a commit hash is recorded", () => {
     assert.notEqual(runResult(["complete", item.statePath]).status, 0);
     execFileSync("git", ["-C", item.root, "init"], { encoding: "utf8" });
     execFileSync("git", ["-C", item.root, "config", "user.email", "test@example.com"]);
-    execFileSync("git", ["-C", item.root, "config", "user.name", "XIAOFlow Test"]);
+    execFileSync("git", ["-C", item.root, "config", "user.name", "XiaoFlow Test"]);
     execFileSync("git", ["-C", item.root, "add", "openspec/changes/archive/demo/tasks.md"]);
     execFileSync("git", ["-C", item.root, "commit", "-m", "test: archive demo"]);
     const commitHash = execFileSync("git", ["-C", item.root, "rev-parse", "HEAD"], {

@@ -3,7 +3,7 @@
 ## 调用上下文
 
 ```
-使用 openspec-propose 技能继续当前 XIAOFlow change："<change-name>"。
+使用 openspec-propose 技能继续当前 XiaoFlow change："<change-name>"。
 
 该 change 已由 Stage 1 执行 `openspec new change` scaffold；用户已确认 change-name，并审阅过 OpenSpec canonical design：
 <状态文件中的 designPath>
@@ -18,7 +18,7 @@
 
 如果设计文档中缺少生成 OpenSpec 工件所需的关键技术细节（如接口约定、数据结构、技术选型），应主动澄清这些具体信息。
 
-完成后返回 XIAOFlow，不运行 /opsx:apply，不 commit。
+完成后返回 XiaoFlow，不运行 /opsx:apply，不 commit。
 ```
 
 ## 产出

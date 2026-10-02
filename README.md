@@ -1,6 +1,6 @@
 # xiao-skills
 
-XIAO 团队的 Claude Code Skills 合集。
+Xiao 团队的 Claude Code Skills 合集。
 
 ## Skills
 
