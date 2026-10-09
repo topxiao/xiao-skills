@@ -5,7 +5,7 @@
 ## 文件格式
 
 计划与 `change.md` 同目录：`docs/changes/<change-name>/implementation-plan.md`。
-排版遵循 change.md 的排版约定：每行不超过约 100 个半角字符，在标点或空格处折行。
+排版遵循 change.md 的排版约定：默认一行写完一个条目不折行，仅当整行明显超过约 100 个半角字符时才在标点或空格处折行，拿不准就保持一行。
 `Depends on`、`Files`、`Acceptance`、`Verification` 有内容时一律用无序列表，一项一行
 （`Depends on: none` 除外）；命令、路径、URL 不折行，Evidence 中每条命令及输出保持一行。
 
