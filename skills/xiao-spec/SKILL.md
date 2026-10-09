@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a host that can read Markdown and access project files; Git and subagent tools are optional
 metadata:
   author: "Xiao"
-  version: "1.1.1"
+  version: "1.2.0"
   generatedBy: "xiao-spec"
 ---
 
@@ -69,3 +69,28 @@ Mini：         设计 → 实现 → 验证 → 归档 → 完成
 - **归档**：长期规格按需同步，归档位置和最终状态已记录；移动或 commit 按用户选择执行。
 
 阶段完成后先汇报证据，再进入下一阶段。恢复时从最早缺少退出证据的阶段继续；无法确定时询问，不猜测。带未解决失败的 change 只能停在 `blocked` 或按用户要求取消，不得标记完成。
+
+## 会话节奏示例
+
+Mini（单任务，设计确认后直接实现）：
+
+```text
+用户：/xiao-spec 给 User 模型加 phone 字段，用 mini
+助手：确认 change-name user-phone、模式 mini；设计要点如下（Goals/Non-goals/Acceptance），批准设计？
+用户：批准
+助手：写入 change.md 和单任务计划 → 实现：测试 → 最小修改 → 双审查 → Evidence
+      验证：已运行 npm test -- user → 3 passed；验收覆盖 R1
+      归档：记录归档状态，不 commit，change 完成。
+```
+
+Standard/Fast（每阶段过门）：
+
+```text
+用户：/xiao-spec 开发用户认证系统
+助手：设计调查 → 方案对比与推荐 → change.md 就绪；关键决策、范围、非目标、验收场景如下，批准设计？
+用户：批准
+助手：计划：5 个任务、依赖、验证命令如下，批准计划？
+用户：批准
+助手：逐任务实现（测试 → 审查 → Evidence）；漂移或阻塞即停并报告
+      验证：本轮新鲜运行，输出 已运行/未运行/失败 报告 → 归档：按用户选择 commit 或不 commit
+```
