@@ -61,7 +61,7 @@
 
 每次用户批准设计或计划时更新 `approved_at`；模式升级时同步更新 `mode`。阶段字段只反映证据已经达到的阶段，不得提前填写。
 
-取消时在 Decisions and Open Questions 记录原因和遗留状态；change 目录保留，除非用户明确要求删除；已产生的代码修改由用户决定去留，不自动回滚。恢复已取消的 change 需用户明确要求：把 `status` 改回 `active`，并重新确认当前阶段所需的批准。归档完成时将 `phase` 和 `status` 更新为 `completed`，并把日期和位置写入已有 `archive_path` 字段。除非项目已有明确约定，不新增第三份归档文档。
+取消时在 Decisions and Open Questions 记录原因和遗留状态；change 目录保留，除非用户明确要求删除；已产生的代码修改由用户决定去留，不自动回滚。恢复已取消的 change 需用户明确要求：把 `status` 改回 `active`，并重新确认当前阶段所需的批准。归档完成时将 `phase` 和 `status` 更新为 `completed`，并把日期和位置写入已有 `archive_path` 字段；位置只写路径和日期，不写 commit hash，避免 commit 后回填 hash 造成第二次提交。除非项目已有明确约定，不新增第三份归档文档。
 
 ## 漂移与恢复
 
@@ -79,6 +79,6 @@
 
 ## 归档
 
-默认在 change 目录写入归档日期、最终状态和归档位置。只有用户明确要求时才物理移动、重命名或 commit；移动后检查源路径和目标路径，commit 后记录真实 hash。不要要求整个工作树干净，也不要把无关修改混进范围。
+归档顺序固定：先把 `change.md` 的 `phase`、`status`、`archive_path` 等归档字段全部更新完成，再执行用户要求的 commit，使 `change.md` 最终态纳入同一次提交。commit hash 不写入 `change.md`——change 目录本身就在该次提交中，hash 可由 `git log` 查得；在最终报告中把 hash 告知用户即可。只有用户明确要求把 hash 记入文件时才追加修改，此时如实说明会产生第二次提交。只有用户明确要求时才物理移动、重命名或 commit；移动后检查源路径和目标路径。不要要求整个工作树干净，也不要把无关修改混进范围。
 
 若仓库已有 `docs/specs/` 或其他长期规格，仅在该变更确实更新稳定契约时同步；没有长期规格就不要为了归档复制一套新 spec。

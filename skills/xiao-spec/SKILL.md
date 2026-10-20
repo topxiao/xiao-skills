@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a host that can read Markdown and access project files; Git and subagent tools are optional
 metadata:
   author: "Xiao"
-  version: "1.2.0"
+  version: "1.2.1"
   generatedBy: "xiao-spec"
 ---
 
